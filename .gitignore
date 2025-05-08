@@ -1,0 +1,60 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# vscode
+.vscode
+
+# SSL Setting for local development
+localhost.pem
+localhost-key.pem
+
+.vercel
+supabase/migrations/prod_schema.sql
+supabase/migrations/test_schema.sql
+repomix-output.txt
+supabase/data_real.sql
+supabase/data_test.sql
+supabase/data.sql
+migration.sql
+test_to_prod_sync.sql
+supabase/migration_downgrade.sql
+supabase/schema_real.sql
+supabase/schema_test.sql
+supabase/migrations/*
+repomix-output.xml
+
+.flaskenv*
+!.env.project
+!.env.vault
+supabase/add_course_job_positions_rls.sql
+supabase/schema_real.sql
+supabase/rpc_functions.sql
+supabase/schema_test.sql
+supabase/schema_real.sql
+localhost+2-key.pem
+localhost+2.pem

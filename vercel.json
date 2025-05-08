@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "excludeFiles": [
+          "app/api/slack/test/**",
+          "app/api/slack/test-notification/**",
+          "app/api/aiagent/test-microcms/**",
+          "sql/insert_test_token.sql",
+          "supabase/diff_result.txt",
+          "supabase/schema_diff_result.txt",
+          "hboardcomponentschat.tsx",
+          "server.js"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
+

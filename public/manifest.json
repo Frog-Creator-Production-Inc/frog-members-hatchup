@@ -1,0 +1,22 @@
+{
+  "name": "Frog Members",
+  "short_name": "Frog",
+  "description": "エンジニアの海外就職をサポート",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4FD1C5",
+  "icons": [
+    {
+      "src": "https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/9cd335ce985b4966aa25136da2c0446c/images_for-slack_cut.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/9cd335ce985b4966aa25136da2c0446c/images_for-slack_cut.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

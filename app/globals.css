@@ -1,0 +1,372 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.logo-container {
+  position: relative;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 8px 32px rgba(79, 209, 197, 0.1);
+}
+
+.wave-container {
+  backdrop-filter: blur(3px);
+}
+
+.wave-effect {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+}
+
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: 55%;
+  left: -50%;
+  border-radius: 40%;
+  background: linear-gradient(45deg, rgba(136, 231, 222, 0.2), rgba(89, 184, 179, 0.3) 60%, rgba(49, 151, 149, 0.4));
+  animation: wave 12s infinite linear;
+}
+
+.wave:nth-child(2) {
+  animation-duration: 16s;
+  background: linear-gradient(45deg, rgba(79, 209, 197, 0.1), rgba(56, 178, 172, 0.2) 60%, rgba(49, 151, 149, 0.3));
+}
+
+.wave:nth-child(3) {
+  animation-duration: 20s;
+  background: linear-gradient(45deg, rgba(79, 209, 197, 0.05), rgba(56, 178, 172, 0.15) 60%, rgba(49, 151, 149, 0.2));
+}
+
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* タイピングアニメーション */
+.typing-animation {
+  display: flex;
+  align-items: center;
+  column-gap: 6px;
+  padding: 6px 12px;
+}
+
+.typing-animation .dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #888;
+  animation: typing 1.5s infinite ease-in-out;
+}
+
+.typing-animation .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-animation .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-animation .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+/* ハートのアニメーション */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.3);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 0.6s ease-in-out;
+}
+
+/* 記事コンテンツのカスタムスタイル */
+.prose {
+  @apply text-gray-800 leading-relaxed;
+  line-height: 1.8;
+}
+
+.prose h1 {
+  @apply text-4xl font-bold mt-12 mb-6 text-gray-900 border-b pb-3 border-gray-200;
+  line-height: 1.3;
+}
+
+.prose h2 {
+  @apply text-3xl font-bold mt-10 mb-5 text-gray-900 border-b pb-2 border-gray-200;
+  line-height: 1.3;
+}
+
+.prose h3 {
+  @apply text-2xl font-semibold mt-8 mb-4 text-gray-900;
+  line-height: 1.4;
+}
+
+.prose h4 {
+  @apply text-xl font-semibold mt-6 mb-3 text-gray-900;
+  line-height: 1.4;
+}
+
+.prose p {
+  @apply my-5 text-base;
+  line-height: 1.8;
+}
+
+.prose ul {
+  @apply list-disc pl-6 my-5;
+}
+
+.prose ol {
+  @apply list-decimal pl-6 my-5;
+}
+
+.prose li {
+  @apply mb-3;
+  line-height: 1.7;
+}
+
+.prose li > p {
+  @apply my-1;
+}
+
+.prose a {
+  @apply text-primary hover:underline transition-colors;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-primary pl-4 italic my-4 text-gray-700 bg-gray-50 p-3 rounded;
+}
+
+.prose img {
+  @apply rounded-lg my-6 mx-auto shadow-md;
+}
+
+.prose pre {
+  @apply bg-gray-800 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.prose code {
+  @apply bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-sm;
+}
+
+.prose pre code {
+  @apply bg-transparent text-gray-100 p-0 text-sm;
+}
+
+.prose table {
+  @apply w-full border-collapse my-6;
+}
+
+.prose thead {
+  @apply bg-gray-100;
+}
+
+.prose th {
+  @apply border border-gray-300 px-4 py-2 text-left font-semibold;
+}
+
+.prose td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.prose hr {
+  @apply my-8 border-gray-200;
+}
+
+.prose strong {
+  @apply font-bold text-gray-900;
+}
+
+.prose em {
+  @apply italic;
+}
+
+.prose figure {
+  @apply my-6;
+}
+
+.prose figcaption {
+  @apply text-center text-sm text-gray-600 mt-2;
+}
+
+/* コースカードのカスタムスタイル */
+.plan {
+  border-radius: 16px;
+  box-shadow: 0 30px 30px -25px rgba(0, 38, 255, 0.205);
+  padding: 10px;
+  background-color: #fff;
+  color: #697e91;
+  max-width: 450px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid #eee;
+}
+
+.plan strong {
+  font-weight: 600;
+  color: #425275;
+}
+
+.plan .inner {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #ecf0ff;
+  border-radius: 12px;
+  position: relative;
+  height: 100%;
+  min-height: 450px;
+}
+
+.plan .course-image {
+  margin: -25px -5px 15px -5px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  height: 160px;
+  width: calc(100% + 10px);
+}
+
+.plan .course-image img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.plan .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #bed6fb;
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.45em 0.65em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #425475;
+  z-index: 1;
+  max-width: 85%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan .pricing small {
+  color: #707a91;
+  font-size: 0.7em;
+  margin-left: 0.25em;
+}
+
+.plan .title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #425675;
+}
+
+.plan .title + * {
+  margin-top: 0.75rem;
+}
+
+.plan .info + * {
+  margin-top: 1rem;
+}
+
+.plan .features {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: auto;
+  flex: 1;
+}
+
+.plan .features li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plan .features li + * {
+  margin-top: 0.75rem;
+}
+
+.plan .features .icon {
+  background-color: #1FCAC5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+}
+
+.plan .features .icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.plan .features + * {
+  margin-top: 1.25rem;
+}
+
+.plan .action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  margin-top: 1.5rem;
+}
+
+.plan .button {
+  background-color: #6558d3;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.125rem;
+  text-align: center;
+  border: 0;
+  outline: 0;
+  width: 100%;
+  padding: 0.625em 0.75em;
+  text-decoration: none;
+}
+
+.plan .button:hover, .plan .button:focus {
+  background-color: #4133B7;
+}
+
