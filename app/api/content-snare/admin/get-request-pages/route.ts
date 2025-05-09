@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     console.log(`【管理者】Content Snareリクエストページ情報取得 (レガシー) (ID: ${requestId})`);
     
     // 新しいfetch-full-statusエンドポイントを内部的に呼び出す
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
     const internalUrl = `${baseUrl}/api/content-snare/admin/fetch-full-status?request_id=${requestId}`;
     
     console.log(`内部APIコール: ${internalUrl}`);

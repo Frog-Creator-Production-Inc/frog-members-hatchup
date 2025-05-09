@@ -14,9 +14,9 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 // 環境変数からURLを取得
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://localhost:3000';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://localhost:4567';
 const parsedUrl = new URL(appUrl);
-const port = parseInt(parsedUrl.port, 10) || 3000;
+const port = parseInt(parsedUrl.port, 10) || 4567;
 
 // 証明書のパスを環境変数から取得（デフォルト値を設定）
 const certKeyPath = process.env.HTTPS_KEY_PATH || './localhost-key.pem';

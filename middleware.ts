@@ -37,7 +37,7 @@ const SCHOOL_EDITOR_TOKEN_REGEX = /^\/schools\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]
 
 // ベースURLを取得
 const getBaseUrl = () => {
-  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  return process.env.NEXT_PUBLIC_APP_URL;
 };
 
 // 管理者専用のパスかどうかをチェック

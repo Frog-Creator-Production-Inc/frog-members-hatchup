@@ -6,13 +6,15 @@ import { cookies } from 'next/headers';
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 const CALENDAR_ID = 'opdsgn.com_78ludapdcqqadm7srhp8p4dsqg@group.calendar.google.com';
 
+// デフォルトのアプリURLを設定
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+const CALLBACK_PATH = '/auth/callback';
+
 // OAuth2クライアントの設定
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.NODE_ENV === 'production'
-    ? 'https://members.frogagent.com/auth/callback'
-    : 'http://localhost:3000/auth/callback'
+  APP_URL + CALLBACK_PATH
 );
 
 // カレンダーAPIのインスタンスを作成
@@ -46,9 +48,8 @@ async function getGoogleRefreshToken() {
 export async function getEvents(timeMin: Date, timeMax: Date) {
   try {
     console.log('Google Calendar - Environment:', process.env.NODE_ENV);
-    console.log('Google Calendar - Redirect URI:', process.env.NODE_ENV === 'production'
-      ? 'https://members.frogagent.com/auth/callback'
-      : 'http://localhost:3000/auth/callback');
+    console.log('Google Calendar - App URL:', APP_URL);
+    console.log('Google Calendar - Redirect URI:', APP_URL + CALLBACK_PATH);
     console.log('Google Calendar - Client ID exists:', !!process.env.GOOGLE_CLIENT_ID);
     console.log('Google Calendar - Client Secret exists:', !!process.env.GOOGLE_CLIENT_SECRET);
     

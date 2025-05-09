@@ -202,7 +202,7 @@ export default async function AdminApplicationDetailPage({ params }: AdminApplic
       console.log(`詳細ページ: Content Snare詳細情報取得開始 (ID: ${application.content_snare_request_id})`);
       try {
         // 絶対URLを使用
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
         const contentSnareApiUrl = `${baseUrl}/api/content-snare/admin/get-request-status?request_id=${application.content_snare_request_id}&verbose=true`;
         
         console.log(`Content Snare API呼び出し: ${contentSnareApiUrl}`);

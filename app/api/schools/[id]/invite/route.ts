@@ -82,7 +82,7 @@ export async function POST(
     }
     
     // 環境変数からベースURLを取得してアクセスURLを生成
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
     const accessUrl = `${baseUrl}/schools/${schoolId}/editor?token=${token}`
     
     return NextResponse.json({ 
