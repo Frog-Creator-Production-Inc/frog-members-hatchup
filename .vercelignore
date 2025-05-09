@@ -5,16 +5,6 @@ app/api/slack/test-notification
 app/api/aiagent/test-microcms
 app/api/slack/debug
 
-# 開発用SQLファイル
-sql/insert_test_token.sql
-
-# 開発用ドキュメント
-docs/a99ecb7882e3.ngrok.app.har
-
-# 開発用差分ファイル
-supabase/diff_result.txt
-supabase/schema_diff_result.txt
-
 # その他開発用ファイル
 hboardcomponentschat.tsx
 
@@ -23,3 +13,7 @@ server.js
 
 # ローカル開発用ファイル
 *.pem
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

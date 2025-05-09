@@ -23,8 +23,8 @@ import { createClient } from 'microcms-js-sdk';
 
 // MicroCMS client configuration
 export const microcmsClient = createClient({
-  serviceDomain: process.env.MICROCMS_SERVICE_DOMAIN || '',
-  apiKey: process.env.MICROCMS_API_KEY || '',
+  serviceDomain: process.env.NEXT_PUBLIC_MICROCMS_SERVICE_DOMAIN || '',
+  apiKey: process.env.NEXT_PUBLIC_MICROCMS_API_KEY || '',
 });
 ```
 

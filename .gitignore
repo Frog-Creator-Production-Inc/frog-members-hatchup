@@ -34,27 +34,12 @@ localhost.pem
 localhost-key.pem
 
 .vercel
-supabase/migrations/prod_schema.sql
-supabase/migrations/test_schema.sql
 repomix-output.txt
-supabase/data_real.sql
-supabase/data_test.sql
-supabase/data.sql
 migration.sql
 test_to_prod_sync.sql
-supabase/migration_downgrade.sql
-supabase/schema_real.sql
-supabase/schema_test.sql
-supabase/migrations/*
+supabase/*
 repomix-output.xml
 
 .flaskenv*
 !.env.project
 !.env.vault
-supabase/add_course_job_positions_rls.sql
-supabase/schema_real.sql
-supabase/rpc_functions.sql
-supabase/schema_test.sql
-supabase/schema_real.sql
-localhost+2-key.pem
-localhost+2.pem
