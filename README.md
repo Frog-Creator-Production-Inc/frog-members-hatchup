@@ -22,15 +22,15 @@
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/gotoworks510/frog-members.git
-cd frog-members-bolt
+git clone https://github.com/Frog-Creator-Production-Inc/frog-members-hatchup.git
+cd frog-members-hatchup
 
 # 依存関係のインストール
 npm install
 
 # 環境変数の設定
 cp .env.local
-# .env.localファイルを編集して必要な環境変数を設定
+# .env.localファイルを編集して必要な環境変数を設定、セットアップガイドを参照
 
 # 開発サーバーの起動
 npm run dev
@@ -51,3 +51,7 @@ npm run dev
 
 ## ライセンス
 このプロジェクトはプライベートであり、無断での使用・配布は禁止されています。
+
+## チーム紹介
+
+Senna: カナダ歴17年、Frog代表。元ブロガー。
