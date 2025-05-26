@@ -42,4 +42,4 @@ repomix-output.xml
 
 .flaskenv*
 !.env.project
-!.env.vault
+.env.vault
