@@ -37,7 +37,6 @@ npm run dev
 ```
 
 ## デプロイ
-
 このプロジェクトはVercelへのデプロイを想定しています。
 
 ## 技術スタック
@@ -55,6 +54,6 @@ npm run dev
 
 ## チーム紹介
 
-Senna: カナダ歴 17 年、Frog 代表。元ブロガー。
+Senna: カナダ歴17年、Frog代表。元ブロガー。
 Kazutora Hattori: よろしくお願いいたします！
 Ryo(Ito): 学生@Langara 旅行が趣味です。
