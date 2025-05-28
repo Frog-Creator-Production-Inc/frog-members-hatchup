@@ -55,3 +55,4 @@ npm run dev
 ## チーム紹介
 
 Senna: カナダ歴17年、Frog代表。元ブロガー。
+Kazutora Hattori: よろしくお願いいたします！
