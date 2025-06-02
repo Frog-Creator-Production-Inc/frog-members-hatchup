@@ -57,3 +57,4 @@ npm run dev
 Senna: カナダ歴17年、Frog代表。元ブロガー。
 Kazutora Hattori: よろしくお願いいたします！
 Ryo(Ito): 学生@Langara 旅行が趣味です。
+Kanta Nagai: Langara Term2　よろしくお願いします！
