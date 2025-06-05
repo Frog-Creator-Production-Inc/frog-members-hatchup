@@ -60,3 +60,4 @@ Ryo(Ito): 学生@Langara 旅行が趣味です。
 Kanta Nagai: Langara Term2　よろしくお願いします！
 Ryo Suzuki: CCTBに通っています。よろしくお願いします！
 Teru: よろしくお願いします! Nice meeting y'all!
+Natsuko Ogata: Langara WMDDを先日卒業しました！日本一時帰国から戻ってきたので、就職活動を本格的に始めていきたいと思います！
