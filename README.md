@@ -62,3 +62,4 @@ npm run dev
 - Teru: よろしくお願いします! Nice meeting y'all!
 - Natsuko Ogata: Langara WMDDを先日卒業しました！日本一時帰国から戻ってきたので、就職活動を本格的に始めていきたいと思います！
 - Nana Okamoto: 業界経験3年のエンジニア。カナダでの就職を目指しています。
+- Nagomi:よろしくお願いします；）
