@@ -64,3 +64,4 @@ npm run dev
 - Nana Okamoto: 業界経験3年のエンジニア。カナダでの就職を目指しています。
 - Nagomi:よろしくお願いします；）
 - Yui: CICCCの学生。三度の飯より飯が好き。
+- Wataru: CCTBに通っております！出身は千葉です！
