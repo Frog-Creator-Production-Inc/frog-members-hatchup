@@ -162,7 +162,7 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
 
       {/* 渡航ステップ - ステップ全体をボタン化 */}
       <div>
-        <h3 className="text-lg font-bold mb-10 flex items-center">
+        <h3 className="text-lg font-bold mb-4 flex items-center">
           <CheckCircle className="h-5 w-5 mr-2 text-primary" />
           渡航までの4ステップ
         </h3>
@@ -175,7 +175,7 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
               href={step.link}
               className="group relative flex flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <div className={`relative mx-4 -mt-6 h-40 overflow-hidden rounded-xl text-white shadow-lg group`}>
+              <div className={`relative mx-4 mt-4 h-40 overflow-hidden rounded-xl text-white shadow-lg group`}>
                 <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-110">
                   {index === 0 && (
                     <Image
@@ -223,13 +223,14 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
               </div>
               
               <div className="p-5">
+                <span className="inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 mb-2 text-xs font-medium">
+                  ステップ {index + 1}
+                </span>
+
                 <div className="flex items-center mb-2">
                   <h5 className="block font-sans text-lg font-semibold leading-snug tracking-normal text-gray-900 antialiased">
                     {step.title}
                   </h5>
-                  <span className="ml-2 inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 text-xs font-medium">
-                    ステップ {index + 1}
-                  </span>
                 </div>
                 <p className="block font-sans text-sm font-light leading-relaxed text-gray-600 antialiased">
                   {step.description}
@@ -254,7 +255,7 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
               href={step.link}
               className="group relative flex flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <div className={`relative mx-4 -mt-4 h-28 overflow-hidden rounded-xl text-white shadow-lg`}>
+              <div className={`relative mx-4 mt-4 h-28 overflow-hidden rounded-xl text-white shadow-lg`}>
                 {index === 0 && (
                   <Image
                     src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/cb241a2106af443f822864f2b1761f38/image_cardpic_1.jpg"
@@ -300,13 +301,14 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
               </div>
               
               <div className="p-4">
+                <span className="inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 mb-2 text-xs font-medium">
+                  ステップ {index + 1}
+                </span>
+
                 <div className="flex items-center mb-1">
                   <h5 className="block font-sans text-base font-semibold leading-snug tracking-normal text-gray-900 antialiased">
                     {step.title}
                   </h5>
-                  <span className="ml-2 inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 text-xs font-medium">
-                    ステップ {index + 1}
-                  </span>
                 </div>
                 <p className="block font-sans text-sm font-light leading-relaxed text-gray-600 antialiased">
                   {step.description}
