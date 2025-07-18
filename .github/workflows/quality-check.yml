@@ -1,0 +1,42 @@
+name: Quality Check
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+      - name: Check for unused dependencies
+        run: npx depcheck --ignores="@types/*"
+        continue-on-error: true
+
+      - name: Check bundle size
+        run: npm run build
+        env:
+          ANALYZE: true
+        continue-on-error: true
