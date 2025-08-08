@@ -468,31 +468,31 @@ export default async function DashboardPage() {
 
           {/* メインコンテンツ - タブ形式で整理 */}
           <Tabs defaultValue="recommended" className="w-full" preventScrollOnActivation>
-            <div className="flex justify-between items-center mb-6">
-              <TabsList className="bg-white shadow-md rounded-lg border border-gray-100 px-0">
-                <TabsTrigger 
-                  value="recommended" 
+            <div className="bg-white shadow-md rounded-lg border border-gray-100 mb-6 md:inline-block">
+              <TabsList className="flex justify-between items-center p-0 md:justify-start overflow-x-auto">
+                <TabsTrigger
+                  value="recommended"
                   className="flex items-center gap-1.5 px-4 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all duration-200"
                 >
                   <Rocket className="h-4 w-4" />
                   <span>おすすめ</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="favorites" 
+                <TabsTrigger
+                  value="favorites"
                   className="flex items-center gap-1.5 px-4 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all duration-200"
                 >
                   <BookOpen className="h-4 w-4" />
                   <span>お気に入り</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="learning" 
+                <TabsTrigger
+                  value="learning"
                   className="flex items-center gap-1.5 px-4 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all duration-200"
                 >
                   <GraduationCap className="h-4 w-4" />
                   <span>学習・準備</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="applications" 
+                <TabsTrigger
+                  value="applications"
                   className="flex items-center gap-1.5 px-4 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all duration-200"
                 >
                   <FileText className="h-4 w-4" />
