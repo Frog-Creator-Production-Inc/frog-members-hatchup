@@ -14,7 +14,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex h-16 items-center border-b bg-white px-4 lg:hidden">
+      <div className="flex h-16 items-center border-b bg-white px-4 lg:hidden sticky top-0 z-50">
         <MobileNav />
         <div className="flex-grow flex items-center justify-center">
           <div className="relative w-10 h-12 my-2">
@@ -30,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
       </div>
       <Sidebar />
       <div className="lg:pl-72">
-        <main className="p-8 relative">
+        <main className="p-4 md:p-8 relative">
           <ErrorBoundary>
             <Suspense fallback={<div>読み込み中...</div>}>{children}</Suspense>
           </ErrorBoundary>

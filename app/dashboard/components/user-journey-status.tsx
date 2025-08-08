@@ -245,7 +245,7 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
         </div>
         
         {/* モバイル表示 - 縦並び */}
-        <div className="grid grid-cols-1 gap-4 md:hidden">
+        <div className="grid grid-cols-1 gap-12 md:hidden">
           {migrationSteps.map((step, index) => (
             <Link 
               key={step.id} 
