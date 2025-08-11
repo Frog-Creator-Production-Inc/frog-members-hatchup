@@ -1,0 +1,108 @@
+get:
+  summary: セッションのメッセージ履歴を取得
+  tags:
+    - AI Agent
+  parameters:
+    - name: session_id
+      in: query
+      required: true
+      schema:
+        type: string
+        description: 取得するメッセージセッションのID
+  responses:
+    "200":
+      description: メッセージ履歴が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              messages:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    user_id:
+                      type: string
+                    session_id:
+                      type: string
+                    sender:
+                      type: string
+                    content:
+                      type: string
+                    metadata:
+                      type: object
+                      additionalProperties: true
+    "400":
+      description: クエリパラメータ 'session_id' が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
+post:
+  summary: AIメッセージをデータベースに保存
+  tags:
+    - AI Agent
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - session_id
+            - sender
+            - content
+          properties:
+            session_id:
+              type: string
+              description: メッセージが属するセッションのID
+            sender:
+              type: string
+              description: メッセージの送信者
+            content:
+              type: string
+              description: メッセージの内容
+            metadata:
+              type: object
+              description: その他のメタデータ
+              nullable: true
+              additionalProperties: true
+  responses:
+    "200":
+      description: メッセージが正常に保存された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message_id:
+                type: string
+                description: 保存されたメッセージのID
+    "400":
+      description: リクエストボディの必須フィールドが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

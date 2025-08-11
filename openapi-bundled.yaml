@@ -1,0 +1,540 @@
+openapi: 3.0.0
+info:
+  title: HatchUp
+  version: 1.0.0
+paths:
+  /api/admin/check:
+    get:
+      summary: ユーザーが管理者かどうかをチェック
+      tags:
+        - Admin
+      responses:
+        '200':
+          description: 正常応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isAdmin:
+                    type: boolean
+                    description: ユーザーが管理者であれば true
+                  source:
+                    type: string
+                    description: 管理者であることの確認元 ('database' または 'fallback')
+                    enum:
+                      - database
+                      - fallback
+                  user:
+                    type: object
+                    description: 認証されたユーザー情報
+                    properties:
+                      id:
+                        type: string
+                        description: ユーザーID
+                      email:
+                        type: string
+                        description: ユーザーのメールアドレス
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/aiagent/messages:
+    get:
+      summary: セッションのメッセージ履歴を取得
+      tags:
+        - AI Agent
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            description: 取得するメッセージセッションのID
+      responses:
+        '200':
+          description: メッセージ履歴が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        user_id:
+                          type: string
+                        session_id:
+                          type: string
+                        sender:
+                          type: string
+                        content:
+                          type: string
+                        metadata:
+                          type: object
+                          additionalProperties: true
+        '400':
+          description: クエリパラメータ 'session_id' が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: AIメッセージをデータベースに保存
+      tags:
+        - AI Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_id
+                - sender
+                - content
+              properties:
+                session_id:
+                  type: string
+                  description: メッセージが属するセッションのID
+                sender:
+                  type: string
+                  description: メッセージの送信者
+                content:
+                  type: string
+                  description: メッセージの内容
+                metadata:
+                  type: object
+                  description: その他のメタデータ
+                  nullable: true
+                  additionalProperties: true
+      responses:
+        '200':
+          description: メッセージが正常に保存された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message_id:
+                    type: string
+                    description: 保存されたメッセージのID
+        '400':
+          description: リクエストボディの必須フィールドが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/aiagent/session:
+    post:
+      summary: 新しいチャットセッションを作成
+      tags:
+        - AI Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: セッションを作成するユーザーのID
+      responses:
+        '200':
+          description: セッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    description: 作成されたセッションのID
+        '400':
+          description: リクエストボディの必須フィールドが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: 特定のセッションの会話履歴を取得
+      tags:
+        - AI Agent
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            description: 取得するセッションのID
+      responses:
+        '200':
+          description: 会話履歴が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chatHistory:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                          description: メッセージの送信者（'user' または 'assistant'）
+                          enum:
+                            - user
+                            - assistant
+                        content:
+                          type: string
+                          description: メッセージの内容
+        '400':
+          description: クエリパラメータ 'sessionId' が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/aiagent/setup:
+    post:
+      summary: 新しいチャットセッションを作成
+      tags:
+        - AI Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: セッションを作成するユーザーのID
+      responses:
+        '200':
+          description: セッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    description: 作成されたセッションのID
+        '400':
+          description: リクエストボディの必須フィールドが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: 特定のセッションの会話履歴を取得、またはテーブルのセットアップをチェック
+      tags:
+        - AI Agent
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            description: 取得するセッションのID
+      responses:
+        '200':
+          description: |
+            会話履歴が正常に取得された場合の応答、
+            またはテーブルが既に存在することを確認した場合の応答。
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      chatHistory:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                              description: メッセージの送信者（'user' または 'assistant'）
+                              enum:
+                                - user
+                                - assistant
+                            content:
+                              type: string
+                              description: メッセージの内容
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                      message:
+                        type: string
+                      tables:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+        '400':
+          description: クエリパラメータ 'sessionId' が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/aiagent/test-microcms:
+    get:
+      summary: MicroCMSからインタビュー記事を取得して分析
+      tags:
+        - AI Agent
+      responses:
+        '200':
+          description: 検索結果と分析データが正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    description: 実行された直接検索クエリ
+                  keywords:
+                    type: array
+                    items:
+                      type: string
+                    description: 実行されたキーワード検索
+                  interviewResults:
+                    type: object
+                    properties:
+                      directSearch:
+                        type: number
+                        description: 直接検索で見つかった記事数
+                      keywordSearch:
+                        type: number
+                        description: キーワード検索で見つかった記事数
+                      uniqueResults:
+                        type: number
+                        description: 重複を排除した合計記事数
+                  analysis:
+                    type: object
+                    properties:
+                      total:
+                        type: number
+                        description: 分析対象となった記事の総数
+                      canadaJobs:
+                        type: number
+                        description: カナダでの仕事に関連する記事数
+                  details:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        slug:
+                          type: string
+                        isCanadaJob:
+                          type: boolean
+                        excerpt:
+                          type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/aiagent:
+    post:
+      summary: 質問に基づいてAIエージェントが回答を生成
+      tags:
+        - AI Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: AIエージェントへの質問
+                sessionId:
+                  type: string
+                  description: 会話セッションのID
+                  nullable: true
+                userId:
+                  type: string
+                  description: ユーザーID
+                  nullable: true
+                chatHistory:
+                  type: array
+                  description: 過去の会話履歴
+                  items:
+                    type: object
+                    properties:
+                      role:
+                        type: string
+                        enum:
+                          - user
+                          - assistant
+                      content:
+                        type: string
+      responses:
+        '200':
+          description: 回答が正常に生成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                    description: AIエージェントが生成した回答
+                  sessionId:
+                    type: string
+                    description: 新しく生成された、または既存のセッションID
+                  sources:
+                    type: object
+                    properties:
+                      visa:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                            url:
+                              type: string
+                      courses:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            school:
+                              type: string
+                            location:
+                              type: string
+                            tuition:
+                              type: number
+                      interviews:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                            slug:
+                              type: string
+                            publishedAt:
+                              type: string
+                              format: date-time
+                  analysis:
+                    type: object
+                    properties:
+                      total:
+                        type: number
+                        description: 分析対象となったインタビュー記事の総数
+                      canadaJobs:
+                        type: number
+                        description: カナダでの仕事に関連するインタビュー記事数
+                  recommendations:
+                    type: object
+                    properties:
+                      migrationGoal:
+                        type: string
+                      futureOccupation:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          title:
+                            type: string
+                            nullable: true
+                          industry:
+                            type: string
+                            nullable: true
+                      courses:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            school:
+                              type: string
+                            location:
+                              type: string
+                            tuition:
+                              type: number
+                    nullable: true
+        '400':
+          description: リクエストボディに質問が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    UnauthorizedError:
+      description: 認証エラー
+    InternalServerError:
+      description: サーバーエラー

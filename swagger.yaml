@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: HatchUp
+  version: 1.0.0
+
+paths:
+  /api/admin/check:
+    $ref: "./app/api/admin/check/admin-check.yaml"
+  /api/aiagent/messages:
+    $ref: "./app/api/aiagent/messages/aiagent-messages.yaml"
+  /api/aiagent/session:
+    $ref: "./app/api/aiagent/session/aiagent-session.yaml"
+  /api/aiagent/setup:
+    $ref: "./app/api/aiagent/setup/aiagent-setup.yaml"
+  /api/aiagent/test-microcms:
+    $ref: "./app/api/aiagent/test-microcms/aiagent-test-microcms.yaml"
+  /api/aiagent:
+    $ref: "./app/api/aiagent/aiagent.yaml"
+
+components:
+  responses:
+    UnauthorizedError:
+      description: 認証エラー
+    InternalServerError:
+      description: サーバーエラー

@@ -1,0 +1,58 @@
+get:
+  summary: MicroCMSからインタビュー記事を取得して分析
+  tags:
+    - AI Agent
+  responses:
+    "200":
+      description: 検索結果と分析データが正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              query:
+                type: string
+                description: 実行された直接検索クエリ
+              keywords:
+                type: array
+                items:
+                  type: string
+                description: 実行されたキーワード検索
+              interviewResults:
+                type: object
+                properties:
+                  directSearch:
+                    type: number
+                    description: 直接検索で見つかった記事数
+                  keywordSearch:
+                    type: number
+                    description: キーワード検索で見つかった記事数
+                  uniqueResults:
+                    type: number
+                    description: 重複を排除した合計記事数
+              analysis:
+                type: object
+                properties:
+                  total:
+                    type: number
+                    description: 分析対象となった記事の総数
+                  canadaJobs:
+                    type: number
+                    description: カナダでの仕事に関連する記事数
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    slug:
+                      type: string
+                    isCanadaJob:
+                      type: boolean
+                    excerpt:
+                      type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

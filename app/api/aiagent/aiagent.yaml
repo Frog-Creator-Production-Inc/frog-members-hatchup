@@ -1,0 +1,140 @@
+post:
+  summary: 質問に基づいてAIエージェントが回答を生成
+  tags:
+    - AI Agent
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - query
+          properties:
+            query:
+              type: string
+              description: AIエージェントへの質問
+            sessionId:
+              type: string
+              description: 会話セッションのID
+              nullable: true
+            userId:
+              type: string
+              description: ユーザーID
+              nullable: true
+            chatHistory:
+              type: array
+              description: 過去の会話履歴
+              items:
+                type: object
+                properties:
+                  role:
+                    type: string
+                    enum: [user, assistant]
+                  content:
+                    type: string
+  responses:
+    "200":
+      description: 回答が正常に生成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              answer:
+                type: string
+                description: AIエージェントが生成した回答
+              sessionId:
+                type: string
+                description: 新しく生成された、または既存のセッションID
+              sources:
+                type: object
+                properties:
+                  visa:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        url:
+                          type: string
+                  courses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        school:
+                          type: string
+                        location:
+                          type: string
+                        tuition:
+                          type: number
+                  interviews:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        slug:
+                          type: string
+                        publishedAt:
+                          type: string
+                          format: date-time
+              analysis:
+                type: object
+                properties:
+                  total:
+                    type: number
+                    description: 分析対象となったインタビュー記事の総数
+                  canadaJobs:
+                    type: number
+                    description: カナダでの仕事に関連するインタビュー記事数
+              recommendations:
+                type: object
+                properties:
+                  migrationGoal:
+                    type: string
+                  futureOccupation:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      title:
+                        type: string
+                        nullable: true
+                      industry:
+                        type: string
+                        nullable: true
+                  courses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        school:
+                          type: string
+                        location:
+                          type: string
+                        tuition:
+                          type: number
+                nullable: true
+    "400":
+      description: リクエストボディに質問が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"

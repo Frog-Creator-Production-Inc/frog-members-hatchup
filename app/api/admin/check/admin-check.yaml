@@ -1,0 +1,33 @@
+get:
+  summary: ユーザーが管理者かどうかをチェック
+  tags:
+    - Admin
+  responses:
+    "200":
+      description: 正常応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              isAdmin:
+                type: boolean
+                description: ユーザーが管理者であれば true
+              source:
+                type: string
+                description: 管理者であることの確認元 ('database' または 'fallback')
+                enum: [database, fallback]
+              user:
+                type: object
+                description: 認証されたユーザー情報
+                properties:
+                  id:
+                    type: string
+                    description: ユーザーID
+                  email:
+                    type: string
+                    description: ユーザーのメールアドレス
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

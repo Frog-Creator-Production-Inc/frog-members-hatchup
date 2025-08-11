@@ -1,0 +1,96 @@
+post:
+  summary: 新しいチャットセッションを作成
+  tags:
+    - AI Agent
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: セッションを作成するユーザーのID
+  responses:
+    "200":
+      description: セッションが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              sessionId:
+                type: string
+                description: 作成されたセッションのID
+    "400":
+      description: リクエストボディの必須フィールドが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
+get:
+  summary: 特定のセッションの会話履歴を取得、またはテーブルのセットアップをチェック
+  tags:
+    - AI Agent
+  parameters:
+    - name: sessionId
+      in: query
+      required: true
+      schema:
+        type: string
+        description: 取得するセッションのID
+  responses:
+    "200":
+      description: |
+        会話履歴が正常に取得された場合の応答、
+        またはテーブルが既に存在することを確認した場合の応答。
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  chatHistory:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                          description: メッセージの送信者（'user' または 'assistant'）
+                          enum: [user, assistant]
+                        content:
+                          type: string
+                          description: メッセージの内容
+              - type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  tables:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+    "400":
+      description: クエリパラメータ 'sessionId' が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
