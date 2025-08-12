@@ -1,0 +1,37 @@
+get:
+  summary: Content Snare OAuth コールバック
+  description: |
+    Content SnareのOAuth認証フローにおけるリダイレクトURIとして機能します。
+    URLクエリパラメータから認証コード（`code`）を取得し、Supabaseを使ってアクセストークンとリフレッシュトークンを交換します。
+    取得したリフレッシュトークンはデータベースに保存され、ユーザーは設定ページにリダイレクトされます。
+  tags:
+    - Auth
+  parameters:
+    - name: code
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Content Snareから付与された認証コード
+    - name: state
+      in: query
+      required: false
+      schema:
+        type: string
+      description: OAuthフローでセキュリティのために使用される任意の状態パラメータ
+  responses:
+    "302":
+      description: |
+        処理が完了し、ユーザーを別のページにリダイレクトします。
+        リダイレクト先URLのクエリパラメータで成功またはエラーの状態が通知されます。
+      headers:
+        Location:
+          schema:
+            type: string
+          description: リダイレクト先のURL（例：/settings?success=content_snare_connected または /settings?error=general）
+    "400":
+      $ref: "../../../../swagger.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

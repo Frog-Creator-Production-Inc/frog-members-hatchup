@@ -1,0 +1,112 @@
+get:
+  summary: Content Snareの統合情報を取得 (レガシー)
+  description: |
+    指定された`request_id`に基づいて、Content Snareの全情報を取得し、旧形式のAPIレスポンスに変換して返します。
+    このエンドポイントは、内部的に`fetch-full-status`エンドポイントを呼び出して結果を整形します。
+    管理者権限が必要です。
+  tags:
+    - Content-snare
+  parameters:
+    - name: request_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Content SnareのRequest ID、または`course_applications`テーブルのID
+    - name: verbose
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: |
+        `true`に設定すると、Content Snareからの応答内容をより詳細に含めます。
+  responses:
+    "200":
+      description: 情報が正常に取得され、レガシー形式に変換された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Content SnareのRequest ID
+              name:
+                type: string
+                description: リクエストの名前
+              status:
+                type: string
+                description: リクエストのステータス
+              url:
+                type: string
+                description: Content Snare上のリクエストURL
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              progress:
+                type: object
+                description: 新しい形式の進捗情報オブジェクト
+              fields_count:
+                type: number
+                description: レガシー形式の総フィールド数
+              done_fields_count:
+                type: number
+                description: レガシー形式の完了済みフィールド数
+              completion_percentage:
+                type: number
+                description: レガシー形式の完了率
+              sections:
+                type: array
+                items:
+                  type: object
+              pages:
+                type: array
+                items:
+                  type: object
+              client:
+                type: object
+              has_unread_comments:
+                type: boolean
+              responses:
+                type: array
+                description: "`verbose`が`true`の場合にのみ含まれる"
+                items:
+                  type: object
+    "400":
+      description: クエリパラメータ `request_id` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "request_idは必須です"
+    "401":
+      $ref: "../../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: 認証情報が無効であるか、管理者権限がない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Content Snareの認証が必要です"
+    "404":
+      description: 参照している内部APIでContent Snare Request IDが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Content Snare情報の取得に失敗しました"
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

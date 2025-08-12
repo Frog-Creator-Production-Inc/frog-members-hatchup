@@ -1,0 +1,137 @@
+get:
+  summary: Content Snareの統合情報を取得
+  description: |
+    指定された`request_id`に基づいて、Content SnareのAPIからリクエストの詳細、進捗状況、およびページ情報を取得します。
+    このエンドポイントは管理者権限が必要です。
+  tags:
+    - Content-snare
+  parameters:
+    - name: request_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Content SnareのRequest ID、または`course_applications`テーブルのID
+    - name: verbose
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: |
+        `true`に設定すると、Content Snareからの応答内容をより詳細に含めます。
+  responses:
+    "200":
+      description: 情報が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Content SnareのRequest ID
+              name:
+                type: string
+                description: リクエストの名前
+              status:
+                type: string
+                description: リクエストのステータス
+              url:
+                type: string
+                description: Content Snare上のリクエストURL
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              progress:
+                type: object
+                description: 進捗状況に関する情報
+                properties:
+                  total_fields:
+                    type: number
+                  done_fields:
+                    type: number
+                  percent:
+                    type: number
+                  completed_sections:
+                    type: number
+                  total_sections:
+                    type: number
+              sections:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    status:
+                      type: string
+              pages:
+                type: array
+                description: リクエスト内のページ情報（`verbose`が`true`の場合は詳細、それ以外は簡略化）
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    status:
+                      type: string
+                    fields_count:
+                      type: number
+                    done_fields_count:
+                      type: number
+              client:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  name:
+                    type: string
+                  email:
+                    type: string
+              has_unread_comments:
+                type: boolean
+              responses:
+                type: array
+                description: |
+                  `verbose`が`true`の場合にのみ含まれる、提出された応答の詳細。
+                items:
+                  type: object
+    "400":
+      description: クエリパラメータ `request_id` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: 管理者権限がない、またはContent Snareの認証情報がない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: Content SnareのRequest IDが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

@@ -2,6 +2,7 @@ openapi: 3.0.0
 info:
   title: HatchUp
   version: 1.0.0
+  description: HatchUpプロジェクトのAPIドキュメントです。
 
 paths:
   /api/admin/check:
@@ -16,10 +17,67 @@ paths:
     $ref: "./app/api/aiagent/test-microcms/aiagent-test-microcms.yaml"
   /api/aiagent:
     $ref: "./app/api/aiagent/aiagent.yaml"
+  /api/auth/content-snare-callback:
+    $ref: "./app/api/auth/content-snare-callback/content-snare-callback.yaml"
+  /api/cancel-subscription:
+    $ref: "./app/api/cancel-subscription/cancel-subscription.yaml"
+  /api/content-snare/admin/fetch-full-status:
+    $ref: "./app/api/content-snare/admin/fetch-full-status/admin-fetch-full-status.yaml"
+  /api/content-snare/admin/get-request-pages:
+    $ref: "./app/api/content-snare/admin/get-request-pages/admin-get-request-pages.yaml"
+  /api/content-snare/admin/get-request-status:
+    $ref: "./app/api/content-snare/admin/get-request-status/admin-get-request-status.yaml"
+  /api/content-snare/admin/get-templates:
+    $ref: "./app/api/content-snare/admin/get-templates/admin-get-templates.yaml"
+  /api/content-snare/admin/list-requests:
+    $ref: "./app/api/content-snare/admin/list-requests/admin-list-requests.yaml"
 
 components:
   responses:
+    # 共通のBad Request (400) レスポンス
+    BadRequest:
+      description: リクエストの形式が不正です。必須パラメータの不足や値の形式が間違っています。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "質問が指定されていません"
+
+    # 共通のUnauthorized (401) レスポンス
     UnauthorizedError:
-      description: 認証エラー
+      description: 認証エラー。有効な認証情報が提供されていません。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "認証情報が不正です"
+
+    # 共通のNot Found (404) レスポンス
+    NotFound:
+      description: 指定したリソースが見つかりません。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "リソースが見つかりません"
+
+    # 共通のInternal Server Error (500) レスポンス
     InternalServerError:
-      description: サーバーエラー
+      description: サーバーエラー。予期せぬ問題が発生しました。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "予期せぬエラーが発生しました"

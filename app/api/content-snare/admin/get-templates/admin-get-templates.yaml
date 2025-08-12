@@ -1,0 +1,56 @@
+get:
+  summary: Content Snareのテンプレート一覧を取得
+  description: |
+    認証済みの管理者ユーザーとして、Content Snareに保存されているリクエストテンプレートの一覧を取得します。
+    このAPIは、リフレッシュトークンを使用してアクセストークンを自動的に取得・更新します。
+  tags:
+    - Content-snare
+  responses:
+    "200":
+      description: テンプレート一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: テンプレートのID
+                name:
+                  type: string
+                  description: テンプレート名
+                slug:
+                  type: string
+                  description: テンプレートのスラッグ
+                created_at:
+                  type: string
+                  format: date-time
+                updated_at:
+                  type: string
+                  format: date-time
+    "401":
+      $ref: "../../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: 管理者権限がない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "管理者権限が必要です"
+    "404":
+      description: Content Snareトークンが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Content Snareトークンが見つかりません"
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

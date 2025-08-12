@@ -1,0 +1,75 @@
+get:
+  summary: Content Snareリクエストのページ情報を取得 (レガシー)
+  description: |
+    指定された`request_id`に対応するContent Snareリクエストのページ情報のリストを取得します。
+    このエンドポイントは、内部的に`fetch-full-status`エンドポイントを呼び出して結果を整形します。
+  tags:
+    - Content-snare
+  parameters:
+    - name: request_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Content SnareのRequest ID、または`course_applications`テーブルのID
+  responses:
+    "200":
+      description: ページ情報が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              request_id:
+                type: string
+                description: Content SnareのRequest ID
+              pages:
+                type: array
+                items:
+                  type: object
+                  description: 簡略化されたページ情報
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    status:
+                      type: string
+                    fields_count:
+                      type: number
+                    done_fields_count:
+                      type: number
+    "400":
+      description: クエリパラメータ `request_id` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "request_idは必須です"
+    "401":
+      $ref: "../../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: 認証情報が無効であるか、管理者権限がない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Content Snareの認証が必要です"
+    "404":
+      description: 参照している内部APIでContent Snare Request IDが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Content Snareページ情報の取得に失敗しました"
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

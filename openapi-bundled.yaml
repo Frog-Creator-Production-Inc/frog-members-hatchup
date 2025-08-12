@@ -2,6 +2,7 @@ openapi: 3.0.0
 info:
   title: HatchUp
   version: 1.0.0
+  description: HatchUpプロジェクトのAPIドキュメントです。
 paths:
   /api/admin/check:
     get:
@@ -232,102 +233,48 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/aiagent/setup:
-    post:
-      summary: 新しいチャットセッションを作成
-      tags:
-        - AI Agent
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - userId
-              properties:
-                userId:
-                  type: string
-                  description: セッションを作成するユーザーのID
-      responses:
-        '200':
-          description: セッションが正常に作成された場合の応答
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  sessionId:
-                    type: string
-                    description: 作成されたセッションのID
-        '400':
-          description: リクエストボディの必須フィールドが不足している場合の応答
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-        '500':
-          $ref: '#/components/responses/InternalServerError'
     get:
-      summary: 特定のセッションの会話履歴を取得、またはテーブルのセットアップをチェック
+      summary: AIエージェント用データベースのセットアップ状態を確認
       tags:
         - AI Agent
-      parameters:
-        - name: sessionId
-          in: query
-          required: true
-          schema:
-            type: string
-            description: 取得するセッションのID
+      description: |
+        SupabaseにAIエージェントに必要なテーブル（visa_types, visa_information, chat_sessions, messages）が
+        存在するかどうかを確認します。テーブルが存在しない場合、手動でセットアップするためのSQLスクリプトを返します。
       responses:
         '200':
           description: |
-            会話履歴が正常に取得された場合の応答、
-            またはテーブルが既に存在することを確認した場合の応答。
+            テーブルの存在確認が完了した際の応答。
           content:
             application/json:
               schema:
                 oneOf:
                   - type: object
                     properties:
-                      chatHistory:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            role:
-                              type: string
-                              description: メッセージの送信者（'user' または 'assistant'）
-                              enum:
-                                - user
-                                - assistant
-                            content:
-                              type: string
-                              description: メッセージの内容
-                  - type: object
-                    properties:
                       success:
                         type: boolean
+                        example: true
                       message:
                         type: string
+                        example: AIエージェント用のテーブルは既に存在します
                       tables:
                         type: array
+                        description: 既存のテーブルのダミーデータ
                         items:
                           type: object
                           properties:
                             id:
                               type: string
-        '400':
-          description: クエリパラメータ 'sessionId' が不足している場合の応答
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: テーブルが存在しません。Supabaseダッシュボードで以下のSQLを実行してください。
+                      sql:
+                        type: string
+                        description: テーブルを作成するためのSQLスクリプト
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/aiagent/test-microcms:
@@ -532,9 +479,575 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/auth/content-snare-callback:
+    get:
+      summary: Content Snare OAuth コールバック
+      description: |
+        Content SnareのOAuth認証フローにおけるリダイレクトURIとして機能します。
+        URLクエリパラメータから認証コード（`code`）を取得し、Supabaseを使ってアクセストークンとリフレッシュトークンを交換します。
+        取得したリフレッシュトークンはデータベースに保存され、ユーザーは設定ページにリダイレクトされます。
+      tags:
+        - Auth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Content Snareから付与された認証コード
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+          description: OAuthフローでセキュリティのために使用される任意の状態パラメータ
+      responses:
+        '302':
+          description: |
+            処理が完了し、ユーザーを別のページにリダイレクトします。
+            リダイレクト先URLのクエリパラメータで成功またはエラーの状態が通知されます。
+          headers:
+            Location:
+              schema:
+                type: string
+              description: リダイレクト先のURL（例：/settings?success=content_snare_connected または /settings?error=general）
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/cancel-subscription:
+    post:
+      summary: ユーザーのStripe定期購読をキャンセル
+      description: |
+        指定されたユーザーIDのStripe定期購読をキャンセルし、Supabaseのプロフィール情報を更新します。
+      tags:
+        - Cancel-subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: 購読をキャンセルするユーザーのID
+                  format: uuid
+      responses:
+        '200':
+          description: 購読が正常にキャンセルされた場合の応答
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Subscription cancelled
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/admin/fetch-full-status:
+    get:
+      summary: Content Snareの統合情報を取得
+      description: |
+        指定された`request_id`に基づいて、Content SnareのAPIからリクエストの詳細、進捗状況、およびページ情報を取得します。
+        このエンドポイントは管理者権限が必要です。
+      tags:
+        - Content-snare
+      parameters:
+        - name: request_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Content SnareのRequest ID、または`course_applications`テーブルのID
+        - name: verbose
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: |
+            `true`に設定すると、Content Snareからの応答内容をより詳細に含めます。
+      responses:
+        '200':
+          description: 情報が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Content SnareのRequest ID
+                  name:
+                    type: string
+                    description: リクエストの名前
+                  status:
+                    type: string
+                    description: リクエストのステータス
+                  url:
+                    type: string
+                    description: Content Snare上のリクエストURL
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  progress:
+                    type: object
+                    description: 進捗状況に関する情報
+                    properties:
+                      total_fields:
+                        type: number
+                      done_fields:
+                        type: number
+                      percent:
+                        type: number
+                      completed_sections:
+                        type: number
+                      total_sections:
+                        type: number
+                  sections:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        status:
+                          type: string
+                  pages:
+                    type: array
+                    description: リクエスト内のページ情報（`verbose`が`true`の場合は詳細、それ以外は簡略化）
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        status:
+                          type: string
+                        fields_count:
+                          type: number
+                        done_fields_count:
+                          type: number
+                  client:
+                    type: object
+                    properties:
+                      id:
+                        type: number
+                      name:
+                        type: string
+                      email:
+                        type: string
+                  has_unread_comments:
+                    type: boolean
+                  responses:
+                    type: array
+                    description: |
+                      `verbose`が`true`の場合にのみ含まれる、提出された応答の詳細。
+                    items:
+                      type: object
+        '400':
+          description: クエリパラメータ `request_id` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: 管理者権限がない、またはContent Snareの認証情報がない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: Content SnareのRequest IDが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/admin/get-request-pages:
+    get:
+      summary: Content Snareリクエストのページ情報を取得 (レガシー)
+      description: |
+        指定された`request_id`に対応するContent Snareリクエストのページ情報のリストを取得します。
+        このエンドポイントは、内部的に`fetch-full-status`エンドポイントを呼び出して結果を整形します。
+      tags:
+        - Content-snare
+      parameters:
+        - name: request_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Content SnareのRequest ID、または`course_applications`テーブルのID
+      responses:
+        '200':
+          description: ページ情報が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request_id:
+                    type: string
+                    description: Content SnareのRequest ID
+                  pages:
+                    type: array
+                    items:
+                      type: object
+                      description: 簡略化されたページ情報
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        status:
+                          type: string
+                        fields_count:
+                          type: number
+                        done_fields_count:
+                          type: number
+        '400':
+          description: クエリパラメータ `request_id` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: request_idは必須です
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: 認証情報が無効であるか、管理者権限がない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Content Snareの認証が必要です
+        '404':
+          description: 参照している内部APIでContent Snare Request IDが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Content Snareページ情報の取得に失敗しました
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/admin/get-request-status:
+    get:
+      summary: Content Snareの統合情報を取得 (レガシー)
+      description: |
+        指定された`request_id`に基づいて、Content Snareの全情報を取得し、旧形式のAPIレスポンスに変換して返します。
+        このエンドポイントは、内部的に`fetch-full-status`エンドポイントを呼び出して結果を整形します。
+        管理者権限が必要です。
+      tags:
+        - Content-snare
+      parameters:
+        - name: request_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Content SnareのRequest ID、または`course_applications`テーブルのID
+        - name: verbose
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: |
+            `true`に設定すると、Content Snareからの応答内容をより詳細に含めます。
+      responses:
+        '200':
+          description: 情報が正常に取得され、レガシー形式に変換された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Content SnareのRequest ID
+                  name:
+                    type: string
+                    description: リクエストの名前
+                  status:
+                    type: string
+                    description: リクエストのステータス
+                  url:
+                    type: string
+                    description: Content Snare上のリクエストURL
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  progress:
+                    type: object
+                    description: 新しい形式の進捗情報オブジェクト
+                  fields_count:
+                    type: number
+                    description: レガシー形式の総フィールド数
+                  done_fields_count:
+                    type: number
+                    description: レガシー形式の完了済みフィールド数
+                  completion_percentage:
+                    type: number
+                    description: レガシー形式の完了率
+                  sections:
+                    type: array
+                    items:
+                      type: object
+                  pages:
+                    type: array
+                    items:
+                      type: object
+                  client:
+                    type: object
+                  has_unread_comments:
+                    type: boolean
+                  responses:
+                    type: array
+                    description: '`verbose`が`true`の場合にのみ含まれる'
+                    items:
+                      type: object
+        '400':
+          description: クエリパラメータ `request_id` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: request_idは必須です
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: 認証情報が無効であるか、管理者権限がない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Content Snareの認証が必要です
+        '404':
+          description: 参照している内部APIでContent Snare Request IDが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Content Snare情報の取得に失敗しました
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/admin/get-templates:
+    get:
+      summary: Content Snareのテンプレート一覧を取得
+      description: |
+        認証済みの管理者ユーザーとして、Content Snareに保存されているリクエストテンプレートの一覧を取得します。
+        このAPIは、リフレッシュトークンを使用してアクセストークンを自動的に取得・更新します。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: テンプレート一覧が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: テンプレートのID
+                    name:
+                      type: string
+                      description: テンプレート名
+                    slug:
+                      type: string
+                      description: テンプレートのスラッグ
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: 管理者権限がない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 管理者権限が必要です
+        '404':
+          description: Content Snareトークンが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Content Snareトークンが見つかりません
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/admin/list-requests:
+    get:
+      summary: Content Snareのリクエスト一覧を取得
+      description: |
+        認証済みの管理者ユーザーとして、Content Snareの全リクエストの一覧を取得します。
+        リクエスト一覧は、アプリケーション内の`course_applications`テーブルと関連付けられ、簡略化された形式で返されます。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: リクエスト一覧が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Content SnareのRequest ID
+                    application_id:
+                      type: string
+                      nullable: true
+                      description: 関連付けられたコース申請のID（存在しない場合は`null`）
+                    name:
+                      type: string
+                      description: リクエストの名前
+                    status:
+                      type: string
+                      description: リクエストのステータス
+                    share_link:
+                      type: string
+                      description: リクエストへの共有リンク
+                    due:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      description: リクエストの期日
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                    last_activity_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      description: 最終活動日時
+                    folder_name:
+                      type: string
+                      nullable: true
+                      description: リクエストが属するフォルダの名前
+                    client_name:
+                      type: string
+                      nullable: true
+                      description: クライアントのフルネーム
+                    client_email:
+                      type: string
+                      nullable: true
+                      description: クライアントのEメールアドレス
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: 管理者権限がない、またはContent Snareの認証情報がない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 管理者権限が必要です
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
+    BadRequest:
+      description: リクエストの形式が不正です。必須パラメータの不足や値の形式が間違っています。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: 質問が指定されていません
     UnauthorizedError:
-      description: 認証エラー
+      description: 認証エラー。有効な認証情報が提供されていません。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: 認証情報が不正です
+    NotFound:
+      description: 指定したリソースが見つかりません。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: リソースが見つかりません
     InternalServerError:
-      description: サーバーエラー
+      description: サーバーエラー。予期せぬ問題が発生しました。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: 予期せぬエラーが発生しました

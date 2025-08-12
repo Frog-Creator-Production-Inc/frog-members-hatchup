@@ -1,0 +1,75 @@
+get:
+  summary: Content Snareのリクエスト一覧を取得
+  description: |
+    認証済みの管理者ユーザーとして、Content Snareの全リクエストの一覧を取得します。
+    リクエスト一覧は、アプリケーション内の`course_applications`テーブルと関連付けられ、簡略化された形式で返されます。
+  tags:
+    - Content-snare
+  responses:
+    "200":
+      description: リクエスト一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Content SnareのRequest ID
+                application_id:
+                  type: string
+                  nullable: true
+                  description: 関連付けられたコース申請のID（存在しない場合は`null`）
+                name:
+                  type: string
+                  description: リクエストの名前
+                status:
+                  type: string
+                  description: リクエストのステータス
+                share_link:
+                  type: string
+                  description: リクエストへの共有リンク
+                due:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: リクエストの期日
+                created_at:
+                  type: string
+                  format: date-time
+                updated_at:
+                  type: string
+                  format: date-time
+                last_activity_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: 最終活動日時
+                folder_name:
+                  type: string
+                  nullable: true
+                  description: リクエストが属するフォルダの名前
+                client_name:
+                  type: string
+                  nullable: true
+                  description: クライアントのフルネーム
+                client_email:
+                  type: string
+                  nullable: true
+                  description: クライアントのEメールアドレス
+    "401":
+      $ref: "../../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: 管理者権限がない、またはContent Snareの認証情報がない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "管理者権限が必要です"
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

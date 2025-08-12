@@ -1,0 +1,31 @@
+post:
+  summary: ユーザーのStripe定期購読をキャンセル
+  description: |
+    指定されたユーザーIDのStripe定期購読をキャンセルし、Supabaseのプロフィール情報を更新します。
+  tags:
+    - Cancel-subscription
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: 購読をキャンセルするユーザーのID
+              format: uuid
+  responses:
+    "200":
+      description: 購読が正常にキャンセルされた場合の応答
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "Subscription cancelled"
+    "400":
+      $ref: "../../../swagger.yaml#/components/responses/BadRequest"
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"
