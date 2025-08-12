@@ -3701,6 +3701,397 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
+  '/api/schools/[id]/invite':
+    post:
+      summary: 学校の担当者用に一時的なアクセストークンを生成
+      description: |
+        このAPIは管理者ユーザーのみが利用可能です。
+        指定された学校IDとメールアドレスに対して、30日間有効な一時的なアクセストークンを生成します。
+        このトークンを使用することで、学校の担当者は認証なしで特定の編集ページにアクセスできます。
+        トークンはデータベースに保存され、有効期限付きのアクセスURLが生成されて返されます。
+      tags:
+        - Schools
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: トークンを生成する学校のID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: トークンを付与する学校担当者のメールアドレス
+                  example: staff@example.com
+      responses:
+        '200':
+          description: アクセストークンが正常に生成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  accessUrl:
+                    type: string
+                    format: uri
+                    description: 学校の編集ページへのアクセスURL
+                  school:
+                    type: string
+                    description: 学校名
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    description: トークンの有効期限
+        '400':
+          description: 無効なリクエストボディ、またはメールアドレスが不正な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 認証されていないユーザーからのリクエストの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '403':
+          description: ユーザーに管理者権限がない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定された学校が見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/api/schools/[id]/photos':
+    post:
+      summary: 学校またはコースの写真をアップロード
+      description: |
+        指定された学校IDに写真をアップロードし、データベースに情報を保存します。
+        オプションとして`courseId`を指定することで、特定のコースに写真を紐づけることができます。
+        アクセスには、リクエストボディで渡される有効なトークンとメールアドレスが必要です。
+        トークンは使用後、履歴が更新されます。
+      tags:
+        - Schools
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 写真をアップロードする学校のID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - imageUrl
+                - token
+                - email
+              properties:
+                imageUrl:
+                  type: string
+                  format: uri
+                  description: アップロードされた写真のURL
+                description:
+                  type: string
+                  nullable: true
+                  description: 写真の説明
+                token:
+                  type: string
+                  description: APIアクセス用の有効なトークン
+                email:
+                  type: string
+                  format: email
+                  description: トークンに関連付けられたメールアドレス
+                courseId:
+                  type: string
+                  nullable: true
+                  description: 写真を紐づけるコースのID
+      responses:
+        '200':
+          description: 写真が正常に登録された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  photo:
+                    type: object
+        '400':
+          description: 必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 無効または期限切れのトークンの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: 学校またはコースの写真を取得
+      description: |
+        指定された学校IDに紐づく写真の一覧を取得します。
+        `courseId`クエリパラメータを指定することで、特定のコースの写真のみにフィルタリングできます。
+        アクセスには、クエリパラメータで渡される有効なトークンとメールアドレスが必要です。
+        トークンは使用後、履歴が更新されます。
+      tags:
+        - Schools
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 写真を取得する学校のID
+        - name: courseId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 写真をフィルタリングするコースのID
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: APIアクセス用の有効なトークン
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+          description: トークンに関連付けられたメールアドレス
+      responses:
+        '200':
+          description: 写真一覧が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  photos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        school_id:
+                          type: string
+                        course_id:
+                          type: string
+                          nullable: true
+                        url:
+                          type: string
+                          format: uri
+                        description:
+                          type: string
+                          nullable: true
+                        created_at:
+                          type: string
+                          format: date-time
+        '400':
+          description: 必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 無効または期限切れのトークンの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: 学校またはコースの写真を削除
+      description: |
+        指定された写真IDに基づいて、写真を削除します。
+        アクセスには、クエリパラメータで渡される有効なトークンとメールアドレスが必要です。
+        トークンは使用後、履歴が更新されます。
+      tags:
+        - Schools
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 写真が属する学校のID
+        - name: photoId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 削除する写真のID
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: APIアクセス用の有効なトークン
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+          description: トークンに関連付けられたメールアドレス
+      responses:
+        '200':
+          description: 写真が正常に削除された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: 必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 無効または期限切れのトークンの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/search:
+    get:
+      summary: 統合検索エンドポイント
+      description: |
+        クエリパラメータ`q`を使用して、ビザ情報とインタビュー記事を統合して検索します。
+        検索結果は、SupabaseとMicroCMSから取得されます。
+        このエンドポイントは、ユーザーが入力したキーワードに関連する多角的な情報を取得するために使用されます。
+      tags:
+        - Search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 検索するキーワード
+          example: ワーホリ ビザ
+      responses:
+        '200':
+          description: 検索が成功し、結果が返された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  visa:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        content:
+                          type: string
+                        visa_type:
+                          type: string
+                  interviews:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        body:
+                          type: string
+                        photo:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              format: uri
+        '400':
+          description: 検索クエリが指定されていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:

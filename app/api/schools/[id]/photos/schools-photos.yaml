@@ -1,0 +1,232 @@
+post:
+  summary: 学校またはコースの写真をアップロード
+  description: |
+    指定された学校IDに写真をアップロードし、データベースに情報を保存します。
+    オプションとして`courseId`を指定することで、特定のコースに写真を紐づけることができます。
+    アクセスには、リクエストボディで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 写真をアップロードする学校のID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - imageUrl
+            - token
+            - email
+          properties:
+            imageUrl:
+              type: string
+              format: uri
+              description: アップロードされた写真のURL
+            description:
+              type: string
+              nullable: true
+              description: 写真の説明
+            token:
+              type: string
+              description: APIアクセス用の有効なトークン
+            email:
+              type: string
+              format: email
+              description: トークンに関連付けられたメールアドレス
+            courseId:
+              type: string
+              nullable: true
+              description: 写真を紐づけるコースのID
+  responses:
+    "200":
+      description: 写真が正常に登録された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              photo:
+                type: object
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"
+get:
+  summary: 学校またはコースの写真を取得
+  description: |
+    指定された学校IDに紐づく写真の一覧を取得します。
+    `courseId`クエリパラメータを指定することで、特定のコースの写真のみにフィルタリングできます。
+    アクセスには、クエリパラメータで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 写真を取得する学校のID
+    - name: courseId
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 写真をフィルタリングするコースのID
+    - name: token
+      in: query
+      required: true
+      schema:
+        type: string
+      description: APIアクセス用の有効なトークン
+    - name: email
+      in: query
+      required: true
+      schema:
+        type: string
+        format: email
+      description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 写真一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              photos:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    school_id:
+                      type: string
+                    course_id:
+                      type: string
+                      nullable: true
+                    url:
+                      type: string
+                      format: uri
+                    description:
+                      type: string
+                      nullable: true
+                    created_at:
+                      type: string
+                      format: date-time
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"
+delete:
+  summary: 学校またはコースの写真を削除
+  description: |
+    指定された写真IDに基づいて、写真を削除します。
+    アクセスには、クエリパラメータで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 写真が属する学校のID
+    - name: photoId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 削除する写真のID
+    - name: token
+      in: query
+      required: true
+      schema:
+        type: string
+      description: APIアクセス用の有効なトークン
+    - name: email
+      in: query
+      required: true
+      schema:
+        type: string
+        format: email
+      description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 写真が正常に削除された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

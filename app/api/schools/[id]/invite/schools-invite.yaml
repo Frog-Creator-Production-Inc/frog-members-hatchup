@@ -1,0 +1,89 @@
+post:
+  summary: 学校の担当者用に一時的なアクセストークンを生成
+  description: |
+    このAPIは管理者ユーザーのみが利用可能です。
+    指定された学校IDとメールアドレスに対して、30日間有効な一時的なアクセストークンを生成します。
+    このトークンを使用することで、学校の担当者は認証なしで特定の編集ページにアクセスできます。
+    トークンはデータベースに保存され、有効期限付きのアクセスURLが生成されて返されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: トークンを生成する学校のID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - email
+          properties:
+            email:
+              type: string
+              format: email
+              description: トークンを付与する学校担当者のメールアドレス
+              example: "staff@example.com"
+  responses:
+    "200":
+      description: アクセストークンが正常に生成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              accessUrl:
+                type: string
+                format: uri
+                description: 学校の編集ページへのアクセスURL
+              school:
+                type: string
+                description: 学校名
+              expiresAt:
+                type: string
+                format: date-time
+                description: トークンの有効期限
+    "400":
+      description: 無効なリクエストボディ、またはメールアドレスが不正な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 認証されていないユーザーからのリクエストの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "403":
+      description: ユーザーに管理者権限がない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定された学校が見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

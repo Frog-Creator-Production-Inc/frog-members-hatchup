@@ -1,0 +1,67 @@
+get:
+  summary: 統合検索エンドポイント
+  description: |
+    クエリパラメータ`q`を使用して、ビザ情報とインタビュー記事を統合して検索します。
+    検索結果は、SupabaseとMicroCMSから取得されます。
+    このエンドポイントは、ユーザーが入力したキーワードに関連する多角的な情報を取得するために使用されます。
+  tags:
+    - Search
+  parameters:
+    - name: q
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 検索するキーワード
+      example: "ワーホリ ビザ"
+  responses:
+    "200":
+      description: 検索が成功し、結果が返された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              visa:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    content:
+                      type: string
+                    visa_type:
+                      type: string
+              interviews:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    body:
+                      type: string
+                    photo:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          format: uri
+    "400":
+      description: 検索クエリが指定されていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"

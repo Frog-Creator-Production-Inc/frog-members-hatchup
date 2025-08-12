@@ -85,6 +85,12 @@ paths:
     $ref: "./app/api/schools/[id]/courses/[courseId]/schools-courses-courseId.yaml"
   /api/schools/[id]/courses:
     $ref: "./app/api/schools/[id]/courses/schools-courses.yaml"
+  /api/schools/[id]/invite:
+    $ref: "./app/api/schools/[id]/invite/schools-invite.yaml"
+  /api/schools/[id]/photos:
+    $ref: "./app/api/schools/[id]/photos/schools-photos.yaml"
+  /api/search:
+    $ref: "./app/api/search/search.yaml"
 
 components:
   responses:
