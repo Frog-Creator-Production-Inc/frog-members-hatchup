@@ -1,0 +1,31 @@
+get:
+  summary: 全ての職種データを取得
+  description: |
+    データベースの`job_positions`テーブルから、全ての職種データ（役職、説明など）を一覧で取得します。
+    結果は役職名（`title`）でソートされて返されます。
+  tags:
+    - Job-positions
+  responses:
+    "200":
+      description: 職種データの一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: 職種ID
+                title:
+                  type: string
+                  description: 役職名
+                description:
+                  type: string
+                  description: 職種の説明
+                created_at:
+                  type: string
+                  format: date-time
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"

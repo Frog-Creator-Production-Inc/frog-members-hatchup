@@ -1,0 +1,34 @@
+post:
+  summary: StripeサブスクリプションのCheckoutセッションを作成
+  description: |
+    指定されたユーザーID (`userId`) に対して、新しいStripeサブスクリプションのためのCheckoutセッションを作成します。
+    このAPIは、ユーザーがすでにアクティブなサブスクリプションを持っていないことを確認し、指定された価格IDでサブスクリプションをセットアップします。
+    ユーザーはStripeのCheckoutページにリダイレクトされ、支払いを完了できます。
+  tags:
+    - Create-subscription
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: サブスクリプションを作成するユーザーのSupabaseユーザーID
+              example: "abcde-12345-fghij-67890"
+  responses:
+    "200":
+      description: Checkoutセッションが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              sessionId:
+                type: string
+                description: 作成されたStripe CheckoutセッションのID
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"

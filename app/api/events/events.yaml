@@ -1,0 +1,65 @@
+get:
+  summary: Google Calendarのイベントを取得
+  description: |
+    指定された年と月にGoogle Calendarからイベントを取得します。
+    このAPIは、Supabaseに保存されているGoogleのリフレッシュトークンを使用して、認証とAPI呼び出しを行います。
+    トークンが存在しない場合はイベントを取得できません。
+    クエリパラメータで年と月を指定しない場合、現在の日付が使用されます。
+  tags:
+    - Events
+  parameters:
+    - name: month
+      in: query
+      required: false
+      schema:
+        type: string
+      description: イベントを取得する月（1-12）
+    - name: year
+      in: query
+      required: false
+      schema:
+        type: string
+      description: イベントを取得する年
+  responses:
+    "200":
+      description: イベントが正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              events:
+                type: array
+                description: Google Calendarから取得したイベントのリスト
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    summary:
+                      type: string
+                      description: イベントのタイトル
+                    start:
+                      type: object
+                      properties:
+                        dateTime:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        date:
+                          type: string
+                          format: date
+                          nullable: true
+                    end:
+                      type: object
+                      properties:
+                        dateTime:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        date:
+                          type: string
+                          format: date
+                          nullable: true
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"

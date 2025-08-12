@@ -1,0 +1,103 @@
+get:
+  summary: MicroCMSのコンテンツを統合的に取得
+  description: |
+    MicroCMSからブログ記事、インタビュー、コース情報などの様々なコンテンツを取得する統合APIです。
+    `type`クエリパラメータによって取得するコンテンツを切り替え、`limit`、`offset`、`category`などのパラメータで取得内容を制御できます。
+    デフォルトでは、複数のコンテンツタイプ（ブログ、インタビュー、注目コース）を一度に取得します。
+    すべてのリクエストには、キャッシュ制御のためのヘッダーが付与されます。
+  tags:
+    - MicroCMS
+  parameters:
+    - name: type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: ["blog", "interview", "course", "all"]
+        default: "all"
+      description: 取得するコンテンツのタイプ。
+    - name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 10
+      description: 取得するコンテンツの数。
+    - name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+      description: 取得を開始するオフセット。
+    - name: category
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 取得するブログ記事のカテゴリー。
+    - name: slug
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 特定のブログ記事を取得するためのスラッグ。`type=blog`の場合に有効。
+    - name: id
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 特定のコース情報を取得するためのID。`type=course`の場合に有効。
+    - name: ttl
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 3600
+      description: キャッシュの有効期限（秒）。
+    - name: revalidate
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: キャッシュを強制的に再検証するかどうか。
+  responses:
+    "200":
+      description: コンテンツが正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: array
+                items: {} # ブログ、インタビュー、コース一覧
+              - type: object
+                properties: {} # 特定のブログ記事、コース情報
+              - type: object
+                properties:
+                  blog:
+                    type: object
+                    properties:
+                      contents:
+                        type: array
+                        items: {}
+                      totalCount:
+                        type: integer
+                  interviews:
+                    type: object
+                    properties:
+                      contents:
+                        type: array
+                        items: {}
+                      totalCount:
+                        type: integer
+                  courses:
+                    type: object
+                    properties:
+                      contents:
+                        type: array
+                        items: {}
+                      totalCount:
+                        type: integer
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"

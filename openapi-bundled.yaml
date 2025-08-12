@@ -2283,6 +2283,282 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/create-customer-portal-session:
+    post:
+      summary: Stripeカスタマーポータルセッションを作成
+      description: |
+        Stripeの顧客ID (`customerId`) を使用して、顧客が請求情報やサブスクリプションを管理するためのカスタマーポータルセッションを作成します。
+        このAPIは、顧客をStripeのホスト型ポータルページにリダイレクトするために使用されます。
+      tags:
+        - Create-customer-portal-session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+              properties:
+                customerId:
+                  type: string
+                  description: Stripeの顧客ID
+                  example: cus_1234567890abcdef
+      responses:
+        '200':
+          description: セッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: 顧客をリダイレクトするためのStripeカスタマーポータルのURL
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/create-subscription:
+    post:
+      summary: StripeサブスクリプションのCheckoutセッションを作成
+      description: |
+        指定されたユーザーID (`userId`) に対して、新しいStripeサブスクリプションのためのCheckoutセッションを作成します。
+        このAPIは、ユーザーがすでにアクティブなサブスクリプションを持っていないことを確認し、指定された価格IDでサブスクリプションをセットアップします。
+        ユーザーはStripeのCheckoutページにリダイレクトされ、支払いを完了できます。
+      tags:
+        - Create-subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: サブスクリプションを作成するユーザーのSupabaseユーザーID
+                  example: abcde-12345-fghij-67890
+      responses:
+        '200':
+          description: Checkoutセッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    description: 作成されたStripe CheckoutセッションのID
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/events:
+    get:
+      summary: Google Calendarのイベントを取得
+      description: |
+        指定された年と月にGoogle Calendarからイベントを取得します。
+        このAPIは、Supabaseに保存されているGoogleのリフレッシュトークンを使用して、認証とAPI呼び出しを行います。
+        トークンが存在しない場合はイベントを取得できません。
+        クエリパラメータで年と月を指定しない場合、現在の日付が使用されます。
+      tags:
+        - Events
+      parameters:
+        - name: month
+          in: query
+          required: false
+          schema:
+            type: string
+          description: イベントを取得する月（1-12）
+        - name: year
+          in: query
+          required: false
+          schema:
+            type: string
+          description: イベントを取得する年
+      responses:
+        '200':
+          description: イベントが正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    description: Google Calendarから取得したイベントのリスト
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        summary:
+                          type: string
+                          description: イベントのタイトル
+                        start:
+                          type: object
+                          properties:
+                            dateTime:
+                              type: string
+                              format: date-time
+                              nullable: true
+                            date:
+                              type: string
+                              format: date
+                              nullable: true
+                        end:
+                          type: object
+                          properties:
+                            dateTime:
+                              type: string
+                              format: date-time
+                              nullable: true
+                            date:
+                              type: string
+                              format: date
+                              nullable: true
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/job-positions:
+    get:
+      summary: 全ての職種データを取得
+      description: |
+        データベースの`job_positions`テーブルから、全ての職種データ（役職、説明など）を一覧で取得します。
+        結果は役職名（`title`）でソートされて返されます。
+      tags:
+        - Job-positions
+      responses:
+        '200':
+          description: 職種データの一覧が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: 職種ID
+                    title:
+                      type: string
+                      description: 役職名
+                    description:
+                      type: string
+                      description: 職種の説明
+                    created_at:
+                      type: string
+                      format: date-time
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/microcms:
+    get:
+      summary: MicroCMSのコンテンツを統合的に取得
+      description: |
+        MicroCMSからブログ記事、インタビュー、コース情報などの様々なコンテンツを取得する統合APIです。
+        `type`クエリパラメータによって取得するコンテンツを切り替え、`limit`、`offset`、`category`などのパラメータで取得内容を制御できます。
+        デフォルトでは、複数のコンテンツタイプ（ブログ、インタビュー、注目コース）を一度に取得します。
+        すべてのリクエストには、キャッシュ制御のためのヘッダーが付与されます。
+      tags:
+        - MicroCMS
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - blog
+              - interview
+              - course
+              - all
+            default: all
+          description: 取得するコンテンツのタイプ。
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: 取得するコンテンツの数。
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: 取得を開始するオフセット。
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 取得するブログ記事のカテゴリー。
+        - name: slug
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 特定のブログ記事を取得するためのスラッグ。`type=blog`の場合に有効。
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 特定のコース情報を取得するためのID。`type=course`の場合に有効。
+        - name: ttl
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 3600
+          description: キャッシュの有効期限（秒）。
+        - name: revalidate
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: キャッシュを強制的に再検証するかどうか。
+      responses:
+        '200':
+          description: コンテンツが正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items: {}
+                  - type: object
+                    properties: {}
+                  - type: object
+                    properties:
+                      blog:
+                        type: object
+                        properties:
+                          contents:
+                            type: array
+                            items: {}
+                          totalCount:
+                            type: integer
+                      interviews:
+                        type: object
+                        properties:
+                          contents:
+                            type: array
+                            items: {}
+                          totalCount:
+                            type: integer
+                      courses:
+                        type: object
+                        properties:
+                          contents:
+                            type: array
+                            items: {}
+                          totalCount:
+                            type: integer
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:

@@ -65,6 +65,16 @@ paths:
     $ref: "./app/api/course-application/schedules/course-application-schedules.yaml"
   /api/course-application/status:
     $ref: "./app/api/course-application/status/course-application-status.yaml"
+  /api/create-customer-portal-session:
+    $ref: "./app/api/create-customer-portal-session/create-customer-portal-session.yaml"
+  /api/create-subscription:
+    $ref: "./app/api/create-subscription/create-subscription.yaml"
+  /api/events:
+    $ref: "./app/api/events/events.yaml"
+  /api/job-positions:
+    $ref: "./app/api/job-positions/job-positions.yaml"
+  /api/microcms:
+    $ref: "./app/api/microcms/microcms.yaml"
 
 components:
   responses:
