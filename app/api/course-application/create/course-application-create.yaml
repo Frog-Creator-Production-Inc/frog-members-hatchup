@@ -1,0 +1,85 @@
+post:
+  summary: コース申請、Content Snareリクエスト、およびユーザーのスケジュールを作成
+  description: |
+    指定された`courseId`、`clientId`、および`intake_date_id`に基づいて、ユーザーのコース申請を作成します。
+    この処理には、Supabaseでの以下の操作が含まれます。
+    1. 認証済みユーザーのプロファイル情報でContent Snareクライアント情報を更新。
+    2. コースに紐づくテンプレートIDを使用してContent Snareに新しいリクエストを作成。
+    3. `course_applications`テーブルに申請データを保存。
+    4. 選択された入学日情報に基づいて`user_schedules`テーブルに予定を作成。
+    5. 内部APIを介してSlackに通知を送信。
+    アクセストークンは、メモリ、Supabase、またはリフレッシュによって自動的に取得・更新されます。
+  tags:
+    - Course-application
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - courseId
+            - clientId
+            - intake_date_id
+          properties:
+            courseId:
+              type: string
+              description: 申請するコースのID
+            clientId:
+              type: string
+              description: 関連するContent SnareクライアントのID
+            intake_date_id:
+              type: string
+              description: 選択された入学日（`course_intake_dates`テーブルのID）
+  responses:
+    "200":
+      description: 申請、リクエスト、スケジュールが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              request_id:
+                type: string
+                description: Content Snareで作成されたリクエストのID
+              share_link:
+                type: string
+                format: uri
+                description: リクエストへの共有リンク
+              application_id:
+                type: string
+                description: Supabaseで作成されたコース申請のID
+              success:
+                type: boolean
+    "400":
+      description: 必須パラメータの不足、コースにテンプレートが設定されていない、または入学日が無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "courseId, clientId, intake_date_idは必須です"
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定されたコース、ユーザー、または入学日が見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

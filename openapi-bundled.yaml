@@ -1849,6 +1849,440 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/course-application/create:
+    post:
+      summary: コース申請、Content Snareリクエスト、およびユーザーのスケジュールを作成
+      description: |
+        指定された`courseId`、`clientId`、および`intake_date_id`に基づいて、ユーザーのコース申請を作成します。
+        この処理には、Supabaseでの以下の操作が含まれます。
+        1. 認証済みユーザーのプロファイル情報でContent Snareクライアント情報を更新。
+        2. コースに紐づくテンプレートIDを使用してContent Snareに新しいリクエストを作成。
+        3. `course_applications`テーブルに申請データを保存。
+        4. 選択された入学日情報に基づいて`user_schedules`テーブルに予定を作成。
+        5. 内部APIを介してSlackに通知を送信。
+        アクセストークンは、メモリ、Supabase、またはリフレッシュによって自動的に取得・更新されます。
+      tags:
+        - Course-application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - courseId
+                - clientId
+                - intake_date_id
+              properties:
+                courseId:
+                  type: string
+                  description: 申請するコースのID
+                clientId:
+                  type: string
+                  description: 関連するContent SnareクライアントのID
+                intake_date_id:
+                  type: string
+                  description: 選択された入学日（`course_intake_dates`テーブルのID）
+      responses:
+        '200':
+          description: 申請、リクエスト、スケジュールが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request_id:
+                    type: string
+                    description: Content Snareで作成されたリクエストのID
+                  share_link:
+                    type: string
+                    format: uri
+                    description: リクエストへの共有リンク
+                  application_id:
+                    type: string
+                    description: Supabaseで作成されたコース申請のID
+                  success:
+                    type: boolean
+        '400':
+          description: 必須パラメータの不足、コースにテンプレートが設定されていない、または入学日が無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'courseId, clientId, intake_date_idは必須です'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定されたコース、ユーザー、または入学日が見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/course-application/details:
+    get:
+      summary: ユーザーのコース申請詳細を取得
+      description: |
+        認証済みのユーザーが所有する特定のコース申請の詳細情報を取得します。
+        申請情報には、関連するコース情報と入学日情報が含まれます。
+        ユーザー自身の申請データにのみアクセス可能です。
+      tags:
+        - Course-application
+      parameters:
+        - name: applicationId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 取得するコース申請のID
+      responses:
+        '200':
+          description: コース申請の詳細情報が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      application:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          user_id:
+                            type: string
+                          course_id:
+                            type: string
+                          status:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          intake_date_id:
+                            type: string
+                            nullable: true
+                          intake_date:
+                            type: object
+                            description: 関連する入学日情報
+                            properties:
+                              id:
+                                type: string
+                              course_id:
+                                type: string
+                              start_date:
+                                type: string
+                                format: date-time
+                              application_deadline:
+                                type: string
+                                format: date-time
+                                nullable: true
+                              month:
+                                type: number
+                              day:
+                                type: number
+                              year:
+                                type: number
+                              is_tentative:
+                                type: boolean
+                              notes:
+                                type: string
+                                nullable: true
+                      course:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                          description:
+                            type: string
+        '400':
+          description: クエリパラメータ `applicationId` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: ユーザーが指定された申請へのアクセス権限を持っていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定された`applicationId`に対応するコース申請またはコース情報が見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/course-application/schedules:
+    get:
+      summary: 特定のコース申請に関連するスケジュール一覧を取得
+      description: |
+        特定のコース申請IDに紐づく全てのユーザースケジュールを取得します。
+        ユーザーは自身の申請に関連するスケジュールのみアクセス可能です。
+        スケジュールは年、月、日、ソート順で昇順に並べ替えられて返されます。
+      tags:
+        - Course-application
+      parameters:
+        - name: applicationId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: スケジュールを取得するコース申請のID
+      responses:
+        '200':
+          description: スケジュール一覧が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        user_id:
+                          type: string
+                        course_application_id:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                          nullable: true
+                        year:
+                          type: number
+                        month:
+                          type: number
+                        day:
+                          type: number
+                          nullable: true
+                        is_admin_locked:
+                          type: boolean
+                        is_completed:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+        '400':
+          description: クエリパラメータ `applicationId` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: ユーザーが指定された申請へのアクセス権限を持っていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定された`applicationId`に対応するコース申請が見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: ユーザーのスケジュールを更新
+      description: |
+        特定のスケジュールIDに対応するユーザースケジュールを更新します。
+        リクエストボディの`action`パラメータによって、完了状態の切り替え、または日付の更新が可能です。
+        - **`toggle_completed`**: `completed`パラメータに基づいて`is_completed`を更新します。
+        - **`update_date`**: `year`, `month`, `day`パラメータに基づいて日付を更新します。
+        この操作には、スケジュールが紐づくコース申請へのアクセス権（自身の申請または管理者権限）が必要です。`is_admin_locked`が`true`の場合、管理者のみが編集できます。
+      tags:
+        - Course-application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - applicationId
+                - scheduleId
+              properties:
+                applicationId:
+                  type: string
+                  description: 更新するスケジュールが紐づくコース申請のID
+                scheduleId:
+                  type: string
+                  description: 更新するスケジュールのID
+                action:
+                  type: string
+                  enum:
+                    - toggle_completed
+                    - update_date
+                  default: toggle_completed
+                  description: 実行するアクション。
+                completed:
+                  type: boolean
+                  description: '`action`が`toggle_completed`の場合に必須。スケジュールの新しい完了状態。'
+                year:
+                  type: number
+                  description: '`action`が`update_date`の場合に必須。新しい年。'
+                month:
+                  type: number
+                  description: '`action`が`update_date`の場合に必須。新しい月。'
+                day:
+                  type: number
+                  description: '`action`が`update_date`の場合に必須。新しい日。'
+      responses:
+        '200':
+          description: スケジュールが正常に更新された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    description: 更新されたスケジュールオブジェクト
+        '400':
+          description: 必須パラメータの不足、または無効なリクエストボディの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: 権限不足によりスケジュールを更新できない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定された申請またはスケジュールが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/course-application/status:
+    get:
+      summary: 特定のコースに対するユーザーの申請ステータスを取得
+      description: |
+        認証済みのユーザー（またはクエリパラメータで指定されたユーザー）が、特定のコースに対して行ったコース申請のステータスを取得します。
+        申請が存在しない場合は`null`を返します。
+      tags:
+        - Course-application
+      parameters:
+        - name: courseId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ステータスを取得するコースのID
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 情報を取得するユーザーのID。指定がない場合は認証済みユーザーIDを使用。
+      responses:
+        '200':
+          description: 申請ステータスが正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                        description: コース申請のID
+                      status:
+                        type: string
+                        description: 申請の現在のステータス
+                      content_snare_request_id:
+                        type: string
+                        description: 関連するContent SnareリクエストのID
+        '400':
+          description: 必須クエリパラメータ`courseId`が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:

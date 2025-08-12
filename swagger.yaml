@@ -57,6 +57,14 @@ paths:
     $ref: "./app/api/content-snare/refresh-token/refresh-token.yaml"
   /api/content-snare/webhook:
     $ref: "./app/api/content-snare/webhook/webhook.yaml"
+  /api/course-application/create:
+    $ref: "./app/api/course-application/create/course-application-create.yaml"
+  /api/course-application/details:
+    $ref: "./app/api/course-application/details/course-application-details.yaml"
+  /api/course-application/schedules:
+    $ref: "./app/api/course-application/schedules/course-application-schedules.yaml"
+  /api/course-application/status:
+    $ref: "./app/api/course-application/status/course-application-status.yaml"
 
 components:
   responses:

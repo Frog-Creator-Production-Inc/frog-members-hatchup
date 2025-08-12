@@ -1,0 +1,176 @@
+get:
+  summary: 特定のコース申請に関連するスケジュール一覧を取得
+  description: |
+    特定のコース申請IDに紐づく全てのユーザースケジュールを取得します。
+    ユーザーは自身の申請に関連するスケジュールのみアクセス可能です。
+    スケジュールは年、月、日、ソート順で昇順に並べ替えられて返されます。
+  tags:
+    - Course-application
+  parameters:
+    - name: applicationId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: スケジュールを取得するコース申請のID
+  responses:
+    "200":
+      description: スケジュール一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    user_id:
+                      type: string
+                    course_application_id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                      nullable: true
+                    year:
+                      type: number
+                    month:
+                      type: number
+                    day:
+                      type: number
+                      nullable: true
+                    is_admin_locked:
+                      type: boolean
+                    is_completed:
+                      type: boolean
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+    "400":
+      description: クエリパラメータ `applicationId` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: ユーザーが指定された申請へのアクセス権限を持っていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定された`applicationId`に対応するコース申請が見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
+post:
+  summary: ユーザーのスケジュールを更新
+  description: |
+    特定のスケジュールIDに対応するユーザースケジュールを更新します。
+    リクエストボディの`action`パラメータによって、完了状態の切り替え、または日付の更新が可能です。
+    - **`toggle_completed`**: `completed`パラメータに基づいて`is_completed`を更新します。
+    - **`update_date`**: `year`, `month`, `day`パラメータに基づいて日付を更新します。
+    この操作には、スケジュールが紐づくコース申請へのアクセス権（自身の申請または管理者権限）が必要です。`is_admin_locked`が`true`の場合、管理者のみが編集できます。
+  tags:
+    - Course-application
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - applicationId
+            - scheduleId
+          properties:
+            applicationId:
+              type: string
+              description: 更新するスケジュールが紐づくコース申請のID
+            scheduleId:
+              type: string
+              description: 更新するスケジュールのID
+            action:
+              type: string
+              enum: ["toggle_completed", "update_date"]
+              default: "toggle_completed"
+              description: 実行するアクション。
+            completed:
+              type: boolean
+              description: "`action`が`toggle_completed`の場合に必須。スケジュールの新しい完了状態。"
+            year:
+              type: number
+              description: "`action`が`update_date`の場合に必須。新しい年。"
+            month:
+              type: number
+              description: "`action`が`update_date`の場合に必須。新しい月。"
+            day:
+              type: number
+              description: "`action`が`update_date`の場合に必須。新しい日。"
+  responses:
+    "200":
+      description: スケジュールが正常に更新された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+                description: 更新されたスケジュールオブジェクト
+    "400":
+      description: 必須パラメータの不足、または無効なリクエストボディの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: 権限不足によりスケジュールを更新できない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定された申請またはスケジュールが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

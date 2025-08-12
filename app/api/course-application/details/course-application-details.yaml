@@ -1,0 +1,111 @@
+get:
+  summary: ユーザーのコース申請詳細を取得
+  description: |
+    認証済みのユーザーが所有する特定のコース申請の詳細情報を取得します。
+    申請情報には、関連するコース情報と入学日情報が含まれます。
+    ユーザー自身の申請データにのみアクセス可能です。
+  tags:
+    - Course-application
+  parameters:
+    - name: applicationId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 取得するコース申請のID
+  responses:
+    "200":
+      description: コース申請の詳細情報が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+                properties:
+                  application:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      user_id:
+                        type: string
+                      course_id:
+                        type: string
+                      status:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      intake_date_id:
+                        type: string
+                        nullable: true
+                      intake_date:
+                        type: object
+                        description: 関連する入学日情報
+                        properties:
+                          id:
+                            type: string
+                          course_id:
+                            type: string
+                          start_date:
+                            type: string
+                            format: date-time
+                          application_deadline:
+                            type: string
+                            format: date-time
+                            nullable: true
+                          month:
+                            type: number
+                          day:
+                            type: number
+                          year:
+                            type: number
+                          is_tentative:
+                            type: boolean
+                          notes:
+                            type: string
+                            nullable: true
+                  course:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      description:
+                        type: string
+    "400":
+      description: クエリパラメータ `applicationId` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: ユーザーが指定された申請へのアクセス権限を持っていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定された`applicationId`に対応するコース申請またはコース情報が見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

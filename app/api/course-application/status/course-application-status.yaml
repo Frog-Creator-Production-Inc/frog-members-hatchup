@@ -1,0 +1,56 @@
+get:
+  summary: 特定のコースに対するユーザーの申請ステータスを取得
+  description: |
+    認証済みのユーザー（またはクエリパラメータで指定されたユーザー）が、特定のコースに対して行ったコース申請のステータスを取得します。
+    申請が存在しない場合は`null`を返します。
+  tags:
+    - Course-application
+  parameters:
+    - name: courseId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: ステータスを取得するコースのID
+    - name: userId
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 情報を取得するユーザーのID。指定がない場合は認証済みユーザーIDを使用。
+  responses:
+    "200":
+      description: 申請ステータスが正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+                nullable: true
+                properties:
+                  id:
+                    type: string
+                    description: コース申請のID
+                  status:
+                    type: string
+                    description: 申請の現在のステータス
+                  content_snare_request_id:
+                    type: string
+                    description: 関連するContent SnareリクエストのID
+    "400":
+      description: 必須クエリパラメータ`courseId`が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
