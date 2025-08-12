@@ -1,0 +1,60 @@
+post:
+  summary: Slackにビザプランの通知を送信
+  description: |
+    新しいビザプランが作成されたことをSlackに通知します。
+    このエンドポイントは、プランを作成したユーザー情報とビザプランIDをリクエストボディから受け取ります。
+    指定されたSlackチャンネルに、ユーザー名、ビザプランID、および詳細を確認するためのダッシュボードへのリンクを含むメッセージを送信します。
+  tags:
+    - Slack
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+            - visaPlanId
+          properties:
+            userId:
+              type: string
+              description: ビザプランを作成したユーザーのID
+            visaPlanId:
+              type: string
+              description: 新しく作成されたビザプランのID
+            userName:
+              type: string
+              nullable: true
+              description: ビザプランを作成したユーザーの名前（オプション）
+  responses:
+    "200":
+      description: 通知が正常に送信された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+    "500":
+      description: サーバーエラーまたはSlackトークンが設定されていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string

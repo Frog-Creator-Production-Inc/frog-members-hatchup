@@ -1,0 +1,78 @@
+post:
+  summary: 新しいビザプランメッセージのSlack通知をトリガー
+  description: |
+    このエンドポイントは、ユーザーがビザプランナー内で新しいメッセージを投稿した際に、Slackへの通知を非同期でトリガーします。
+    ユーザーは認証されている必要があり、リクエスト内の`userId`は認証されたユーザーのIDと一致しなければなりません。
+    リクエストボディからメッセージの詳細を受け取り、データベースからユーザー情報を取得後、Slack通知を送信します。
+    このプロセスはビザプランナーの応答性を保つために非同期で実行されます。
+  tags:
+    - Slack
+  security:
+    - cookieAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - messageId
+            - planId
+            - userId
+            - title
+            - content
+          properties:
+            messageId:
+              type: string
+              description: 新規メッセージのID
+            planId:
+              type: string
+              description: メッセージが投稿されたビザプランのID
+            userId:
+              type: string
+              description: メッセージを送信したユーザーのID
+            title:
+              type: string
+              description: メッセージのタイトル
+            content:
+              type: string
+              description: メッセージの本文
+  responses:
+    "200":
+      description: 通知が正常にトリガーされた場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 認証されていないユーザーからのリクエストの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "403":
+      description: 認証されたユーザーIDがリクエストと一致しない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

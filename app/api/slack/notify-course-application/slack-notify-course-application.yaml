@@ -1,0 +1,57 @@
+post:
+  summary: 新しいコース申請のSlack通知を送信
+  description: |
+    ユーザーが新しいコースに申請した際に、Slackに通知を送信するためのエンドポイントです。
+    このAPIは、認証されたユーザーセッションを必要とします。
+    リクエストボディから`applicationId`と`courseName`を受け取り、ユーザー情報をデータベースから取得して、Slack通知をトリガーします。
+    通知には、申請者の名前、コース名、および管理者向けの申請詳細へのリンクが含まれます。
+  tags:
+    - Slack
+  security:
+    - cookieAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - applicationId
+            - courseName
+          properties:
+            applicationId:
+              type: string
+              description: 新しく作成されたコース申請のID
+            courseName:
+              type: string
+              description: 申請されたコースの名前
+  responses:
+    "200":
+      description: 通知が正常に送信された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+    "400":
+      description: 必須パラメータが不足している、またはリクエストボディが不正な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 認証されていないユーザーからのリクエストの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

@@ -91,6 +91,20 @@ paths:
     $ref: "./app/api/schools/[id]/photos/schools-photos.yaml"
   /api/search:
     $ref: "./app/api/search/search.yaml"
+  /api/slack/new-message:
+    $ref: "./app/api/slack/new-message/slack-new-message.yaml"
+  /api/slack/new-visa-plan:
+    $ref: "./app/api/slack/new-visa-plan/slack-new-visa-plan.yaml"
+  /api/slack/notify-chat-message:
+    $ref: "./app/api/slack/notify-chat-message/slack-notify-chat-message.yaml"
+  /api/slack/notify-course-application:
+    $ref: "./app/api/slack/notify-course-application/slack-notify-course-application.yaml"
+  /api/slack/notify-onboarding:
+    $ref: "./app/api/slack/notify-onboarding/slack-notify-onboarding.yaml"
+  /api/slack/notify-visa-message:
+    $ref: "./app/api/slack/notify-visa-message/slack-notify-visa-message.yaml"
+  /api/slack:
+    $ref: "./app/api/slack/slack.yaml"
 
 components:
   responses:

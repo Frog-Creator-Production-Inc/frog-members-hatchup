@@ -1,0 +1,71 @@
+post:
+  summary: Slackにチャットメッセージの通知を送信
+  description: |
+    このエンドポイントは、新しいチャットメッセージに関する通知をSlackに送信するために使用されます。
+    メッセージの内容、送信者、受信者、および関連するチャットのリンクを含むリッチなメッセージブロックを生成し、指定されたSlackチャンネルに投稿します。
+  tags:
+    - Slack
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+            - messageContent
+          properties:
+            userId:
+              type: string
+              description: メッセージを送信したユーザーのID
+            messageContent:
+              type: string
+              description: 通知するチャットメッセージの内容
+            sender:
+              type: string
+              nullable: true
+              description: メッセージの送信者名（オプション）
+            receiver:
+              type: string
+              nullable: true
+              description: メッセージの受信者名（オプション）
+            messageId:
+              type: string
+              nullable: true
+              description: メッセージのID（オプション）
+            channelId:
+              type: string
+              nullable: true
+              description: メッセージが属するチャットチャンネルのID（オプション）
+  responses:
+    "200":
+      description: 通知が正常に送信された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+    "500":
+      description: サーバーエラーまたはSlackトークンが設定されていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string

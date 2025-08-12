@@ -4092,6 +4092,494 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/slack/new-message:
+    post:
+      summary: Slackにチャットメッセージの通知を送信
+      description: |
+        このエンドポイントは、新しいチャットメッセージに関する通知をSlackに送信するために使用されます。
+        メッセージの内容、送信者、受信者、および関連するチャットのリンクを含むリッチなメッセージブロックを生成し、指定されたSlackチャンネルに投稿します。
+      tags:
+        - Slack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - messageContent
+              properties:
+                userId:
+                  type: string
+                  description: メッセージを送信したユーザーのID
+                messageContent:
+                  type: string
+                  description: 通知するチャットメッセージの内容
+                sender:
+                  type: string
+                  nullable: true
+                  description: メッセージの送信者名（オプション）
+                receiver:
+                  type: string
+                  nullable: true
+                  description: メッセージの受信者名（オプション）
+                messageId:
+                  type: string
+                  nullable: true
+                  description: メッセージのID（オプション）
+                channelId:
+                  type: string
+                  nullable: true
+                  description: メッセージが属するチャットチャンネルのID（オプション）
+      responses:
+        '200':
+          description: 通知が正常に送信された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: 必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+        '500':
+          description: サーバーエラーまたはSlackトークンが設定されていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+  /api/slack/new-visa-plan:
+    post:
+      summary: Slackにビザプランの通知を送信
+      description: |
+        新しいビザプランが作成されたことをSlackに通知します。
+        このエンドポイントは、プランを作成したユーザー情報とビザプランIDをリクエストボディから受け取ります。
+        指定されたSlackチャンネルに、ユーザー名、ビザプランID、および詳細を確認するためのダッシュボードへのリンクを含むメッセージを送信します。
+      tags:
+        - Slack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - visaPlanId
+              properties:
+                userId:
+                  type: string
+                  description: ビザプランを作成したユーザーのID
+                visaPlanId:
+                  type: string
+                  description: 新しく作成されたビザプランのID
+                userName:
+                  type: string
+                  nullable: true
+                  description: ビザプランを作成したユーザーの名前（オプション）
+      responses:
+        '200':
+          description: 通知が正常に送信された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: 必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+        '500':
+          description: サーバーエラーまたはSlackトークンが設定されていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+  /api/slack/notify-chat-message:
+    post:
+      summary: 新規チャットメッセージのSlack通知をトリガー
+      description: |
+        このエンドポイントは、新しいチャットメッセージが作成された際に、Slackへの通知を非同期でトリガーします。
+        リクエストボディからメッセージのID、チャンネルID、ユーザーID、メッセージ本文を受け取り、事前に定義されたSlack通知関数を呼び出します。
+        このAPIは、チャット機能のメインフローから分離されており、通知処理がチャットの応答性に影響を与えないように設計されています。
+        内部では、送信者の権限やセッション認証のチェックも行われますが、エラーが発生しても通知の試行は続行されます。
+      tags:
+        - Slack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - messageId
+                - channelId
+                - userId
+                - text
+              properties:
+                messageId:
+                  type: string
+                  description: 新規メッセージのID
+                channelId:
+                  type: string
+                  description: メッセージが投稿されたチャットチャンネルのID
+                userId:
+                  type: string
+                  description: メッセージを送信したユーザーのID
+                text:
+                  type: string
+                  description: メッセージの本文
+                userName:
+                  type: string
+                  nullable: true
+                  description: メッセージを送信したユーザーの名前（オプション）
+      responses:
+        '200':
+          description: 通知が正常にトリガーされた場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: object
+        '400':
+          description: 必須パラメータが不足している、またはリクエストボディの解析に失敗した場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/slack/notify-course-application:
+    post:
+      summary: 新しいコース申請のSlack通知を送信
+      description: |
+        ユーザーが新しいコースに申請した際に、Slackに通知を送信するためのエンドポイントです。
+        このAPIは、認証されたユーザーセッションを必要とします。
+        リクエストボディから`applicationId`と`courseName`を受け取り、ユーザー情報をデータベースから取得して、Slack通知をトリガーします。
+        通知には、申請者の名前、コース名、および管理者向けの申請詳細へのリンクが含まれます。
+      tags:
+        - Slack
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - applicationId
+                - courseName
+              properties:
+                applicationId:
+                  type: string
+                  description: 新しく作成されたコース申請のID
+                courseName:
+                  type: string
+                  description: 申請されたコースの名前
+      responses:
+        '200':
+          description: 通知が正常に送信された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: 必須パラメータが不足している、またはリクエストボディが不正な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 認証されていないユーザーからのリクエストの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/slack/notify-onboarding:
+    post:
+      summary: 新しいコース申請のSlack通知を送信
+      description: |
+        ユーザーが新しいコースに申請した際に、Slackに通知を送信するためのエンドポイントです。
+        このAPIは、認証されたユーザーセッションを必要とします。
+        リクエストボディから`applicationId`と`courseName`を受け取り、ユーザー情報をデータベースから取得して、Slack通知をトリガーします。
+        通知には、申請者の名前、コース名、および管理者向けの申請詳細へのリンクが含まれます。
+      tags:
+        - Slack
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - applicationId
+                - courseName
+              properties:
+                applicationId:
+                  type: string
+                  description: 新しく作成されたコース申請のID
+                courseName:
+                  type: string
+                  description: 申請されたコースの名前
+      responses:
+        '200':
+          description: 通知が正常に送信された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: 必須パラメータが不足している、またはリクエストボディが不正な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 認証されていないユーザーからのリクエストの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/slack/notify-visa-message:
+    post:
+      summary: 新しいビザプランメッセージのSlack通知をトリガー
+      description: |
+        このエンドポイントは、ユーザーがビザプランナー内で新しいメッセージを投稿した際に、Slackへの通知を非同期でトリガーします。
+        ユーザーは認証されている必要があり、リクエスト内の`userId`は認証されたユーザーのIDと一致しなければなりません。
+        リクエストボディからメッセージの詳細を受け取り、データベースからユーザー情報を取得後、Slack通知を送信します。
+        このプロセスはビザプランナーの応答性を保つために非同期で実行されます。
+      tags:
+        - Slack
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - messageId
+                - planId
+                - userId
+                - title
+                - content
+              properties:
+                messageId:
+                  type: string
+                  description: 新規メッセージのID
+                planId:
+                  type: string
+                  description: メッセージが投稿されたビザプランのID
+                userId:
+                  type: string
+                  description: メッセージを送信したユーザーのID
+                title:
+                  type: string
+                  description: メッセージのタイトル
+                content:
+                  type: string
+                  description: メッセージの本文
+      responses:
+        '200':
+          description: 通知が正常にトリガーされた場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: 必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 認証されていないユーザーからのリクエストの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '403':
+          description: 認証されたユーザーIDがリクエストと一致しない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/slack:
+    get:
+      summary: Slack API関連情報取得エンドポイント
+      description: |
+        クエリパラメータの`action`に応じて、Slackコミュニティに関する様々な情報を取得します。
+        - `action`が指定されない場合、すべてのコミュニティカテゴリ情報を返します。
+        - `action=new-members-count`と`category`を指定すると、指定カテゴリの新規メンバー数を返します。
+        - `action=member-count`と`category`を指定すると、指定カテゴリの総メンバー数を返します。
+        - `action=general-member-count`を指定すると、generalチャンネルの総メンバー数を返します。
+        メンバー数情報はキャッシュされ、再検証間隔は1時間です。
+      tags:
+        - Slack
+      parameters:
+        - name: action
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - new-members-count
+              - member-count
+              - general-member-count
+          description: 実行するアクション。指定がない場合は全てのカテゴリ情報を返します。
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+          description: '`action`が`new-members-count`または`member-count`の場合に必須となるカテゴリ名。'
+      responses:
+        '200':
+          description: 正常な応答。応答スキーマは`action`パラメータによって異なります。
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - title: All Categories Response
+                    type: object
+                    properties:
+                      success:
+                        type: boolean
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            members:
+                              type: number
+                            newMembers:
+                              type: number
+                  - title: New Members Count Response
+                    type: object
+                    properties:
+                      category:
+                        type: string
+                      newMembersCount:
+                        type: number
+                      cached:
+                        type: boolean
+                  - title: Member Count Response
+                    type: object
+                    properties:
+                      category:
+                        type: string
+                      memberCount:
+                        type: number
+                      cached:
+                        type: boolean
+                  - title: General Member Count Response
+                    type: object
+                    properties:
+                      success:
+                        type: boolean
+                      memberCount:
+                        type: number
+                      source:
+                        type: string
+                        enum:
+                          - slack_api
+                          - default
+                          - error
+                      error:
+                        type: string
+                        nullable: true
+        '400':
+          description: 必須のクエリパラメータが不足している、または無効な値が指定された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:

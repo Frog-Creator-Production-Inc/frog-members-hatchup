@@ -1,0 +1,60 @@
+post:
+  summary: 新規チャットメッセージのSlack通知をトリガー
+  description: |
+    このエンドポイントは、新しいチャットメッセージが作成された際に、Slackへの通知を非同期でトリガーします。
+    リクエストボディからメッセージのID、チャンネルID、ユーザーID、メッセージ本文を受け取り、事前に定義されたSlack通知関数を呼び出します。
+    このAPIは、チャット機能のメインフローから分離されており、通知処理がチャットの応答性に影響を与えないように設計されています。
+    内部では、送信者の権限やセッション認証のチェックも行われますが、エラーが発生しても通知の試行は続行されます。
+  tags:
+    - Slack
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - messageId
+            - channelId
+            - userId
+            - text
+          properties:
+            messageId:
+              type: string
+              description: 新規メッセージのID
+            channelId:
+              type: string
+              description: メッセージが投稿されたチャットチャンネルのID
+            userId:
+              type: string
+              description: メッセージを送信したユーザーのID
+            text:
+              type: string
+              description: メッセージの本文
+            userName:
+              type: string
+              nullable: true
+              description: メッセージを送信したユーザーの名前（オプション）
+  responses:
+    "200":
+      description: 通知が正常にトリガーされた場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              result:
+                type: object
+    "400":
+      description: 必須パラメータが不足している、またはリクエストボディの解析に失敗した場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
