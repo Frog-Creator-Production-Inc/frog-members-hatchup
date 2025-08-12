@@ -1,0 +1,130 @@
+post:
+  summary: 特定の学校に新しいコースを登録
+  description: |
+    学校IDに基づいて、新しいコースの情報をデータベースに登録します。
+    アクセスには、リクエストボディで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: コースを登録する学校のID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - course
+            - token
+            - email
+          properties:
+            course:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: コース名
+                category:
+                  type: string
+                  nullable: true
+                  description: コースのカテゴリー
+                description:
+                  type: string
+                  nullable: true
+                  description: コースの説明
+                total_weeks:
+                  type: number
+                  nullable: true
+                  description: 合計期間（週）
+                lecture_weeks:
+                  type: number
+                  nullable: true
+                  description: 講義期間（週）
+                work_permit_weeks:
+                  type: number
+                  nullable: true
+                  description: 労働許可期間（週）
+                tuition_and_others:
+                  type: string
+                  nullable: true
+                  description: 授業料およびその他の費用
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: コース詳細のURL
+                admission_requirements:
+                  type: string
+                  nullable: true
+                  description: 入学要件
+                graduation_requirements:
+                  type: string
+                  nullable: true
+                  description: 卒業要件
+                job_support:
+                  type: string
+                  nullable: true
+                  description: 就職支援について
+                notes:
+                  type: string
+                  nullable: true
+                  description: 備考
+            token:
+              type: string
+              description: APIアクセス用の有効なトークン
+            email:
+              type: string
+              format: email
+              description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 新規コースが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              course:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  school_id:
+                    type: string
+                  name:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../swagger.yaml#/components/responses/InternalServerError"

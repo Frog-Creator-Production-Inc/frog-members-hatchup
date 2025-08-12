@@ -1,0 +1,200 @@
+put:
+  summary: 特定のコース情報を更新
+  description: |
+    学校IDとコースIDに基づいて、コースの詳細情報を更新します。
+    アクセスには、リクエストボディで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 更新するコースのID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - course
+            - token
+            - email
+          properties:
+            course:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: コース名
+                category:
+                  type: string
+                  description: コースのカテゴリー
+                description:
+                  type: string
+                  description: コースの説明
+                total_weeks:
+                  type: number
+                  description: 合計期間（週）
+                lecture_weeks:
+                  type: number
+                  description: 講義期間（週）
+                work_permit_weeks:
+                  type: number
+                  description: 労働許可期間（週）
+                tuition_and_others:
+                  type: string
+                  description: 授業料およびその他の費用
+                url:
+                  type: string
+                  format: uri
+                  description: コース詳細のURL
+                admission_requirements:
+                  type: string
+                  description: 入学要件
+                graduation_requirements:
+                  type: string
+                  description: 卒業要件
+                job_support:
+                  type: string
+                  description: 就職支援について
+                notes:
+                  type: string
+                  description: 備考
+            token:
+              type: string
+              description: APIアクセス用の有効なトークン
+            email:
+              type: string
+              format: email
+              description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: コース情報が正常に更新された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../swagger.yaml#/components/responses/InternalServerError"
+delete:
+  summary: 特定のコースを削除
+  description: |
+    学校IDとコースIDに基づいて、コースとそれに紐づく全ての関連データを削除します。
+    アクセスには、リクエストボディで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+    **注意**: この操作は`favorite_courses`、`school_photos`、`course_subjects`など、関連する複数のテーブルのデータを削除します。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 削除するコースのID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - token
+            - email
+          properties:
+            token:
+              type: string
+              description: APIアクセス用の有効なトークン
+            email:
+              type: string
+              format: email
+              description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: コースが正常に削除された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../swagger.yaml#/components/responses/InternalServerError"

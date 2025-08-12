@@ -1,0 +1,354 @@
+get:
+  summary: 特定のコースの科目一覧を取得
+  description: |
+    学校IDとコースIDに基づいて、コースの科目一覧を取得します。
+    アクセスには、クエリパラメータで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 科目一覧を取得するコースのID
+    - name: token
+      in: query
+      required: true
+      schema:
+        type: string
+      description: APIアクセス用の有効なトークン
+    - name: email
+      in: query
+      required: true
+      schema:
+        type: string
+        format: email
+      description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 科目一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                course_id:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+                  nullable: true
+                created_at:
+                  type: string
+                  format: date-time
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"
+post:
+  summary: 特定のコースに新しい科目を追加
+  description: |
+    指定されたコースIDに新しい科目を登録します。
+    アクセスには、リクエストボディで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 科目を追加するコースのID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - subject
+            - token
+            - email
+          properties:
+            subject:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  description: 科目のタイトル
+                description:
+                  type: string
+                  nullable: true
+                  description: 科目の説明
+            token:
+              type: string
+              description: APIアクセス用の有効なトークン
+            email:
+              type: string
+              format: email
+              description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 科目が正常に追加された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"
+delete:
+  summary: 特定のコースから科目を削除
+  description: |
+    指定された科目IDに基づいて、コースから科目を削除します。
+    アクセスには、クエリパラメータで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 科目を削除するコースのID
+    - name: subjectId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 削除する科目のID
+    - name: token
+      in: query
+      required: true
+      schema:
+        type: string
+      description: APIアクセス用の有効なトークン
+    - name: email
+      in: query
+      required: true
+      schema:
+        type: string
+        format: email
+      description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 科目が正常に削除された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"
+put:
+  summary: 特定のコースの科目を更新
+  description: |
+    指定された科目IDに基づいて、コースの科目情報を更新します。
+    アクセスには、リクエストボディで渡される有効なトークンとメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 科目を更新するコースのID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - subject
+            - token
+            - email
+          properties:
+            subject:
+              type: object
+              required:
+                - id
+                - title
+              properties:
+                id:
+                  type: string
+                  description: 更新する科目のID
+                title:
+                  type: string
+                  description: 新しい科目のタイトル
+                description:
+                  type: string
+                  nullable: true
+                  description: 新しい科目の説明
+            token:
+              type: string
+              description: APIアクセス用の有効なトークン
+            email:
+              type: string
+              format: email
+              description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 科目が正常に更新された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"

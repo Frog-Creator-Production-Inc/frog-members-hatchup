@@ -1,0 +1,178 @@
+get:
+  summary: 特定のコースに関連付けられた職種を取得
+  description: |
+    特定の学校とコースIDに紐づく、関連職種の一覧を取得します。
+    このエンドポイントは、`Authorization`ヘッダーで渡される有効なトークンと`X-Email`ヘッダーで渡されるメールアドレスを使用して認証を行います。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 職種データを取得するコースのID
+    - name: Authorization
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: "^Bearer [a-zA-Z0-9_-]+$"
+      description: APIアクセス用の有効なBearerトークン
+    - name: X-Email
+      in: header
+      required: true
+      schema:
+        type: string
+        format: email
+      description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 職種データが正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                course_id:
+                  type: string
+                job_position_id:
+                  type: string
+                job_positions:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    industry:
+                      type: string
+    "400":
+      description: 必要な認証情報が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に所属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"
+put:
+  summary: 特定のコースに関連付ける職種を更新
+  description: |
+    特定のコースに関連付ける職種リストを更新します。
+    リクエストボディで渡された`jobPositionIds`のリストに基づいて、既存の関連付けをすべて削除し、新しい関連付けを登録します。
+    この操作には、`Authorization`ヘッダーで渡される有効なトークンと`X-Email`ヘッダーで渡されるメールアドレスが必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 職種を更新するコースのID
+    - name: Authorization
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: "^Bearer [a-zA-Z0-9_-]+$"
+      description: APIアクセス用の有効なBearerトークン
+    - name: X-Email
+      in: header
+      required: true
+      schema:
+        type: string
+        format: email
+      description: トークンに関連付けられたメールアドレス
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - jobPositionIds
+          properties:
+            jobPositionIds:
+              type: array
+              items:
+                type: string
+              description: コースに関連付ける職種IDのリスト
+  responses:
+    "200":
+      description: 職種関連付けが正常に更新された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+    "400":
+      description: 必要な認証情報が不足している、またはリクエストボディの形式が不正な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: コースが見つからない、または学校に所属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"

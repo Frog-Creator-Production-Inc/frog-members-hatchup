@@ -1,0 +1,275 @@
+get:
+  summary: 特定のコースの開始日一覧を取得
+  description: |
+    学校ID (`id`) とコースID (`courseId`) に基づいて、コースの開始日一覧を取得します。
+    アクセスには、有効期限内で未使用のアクセス**トークン**と**メールアドレス**が必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 開始日を取得するコースのID
+    - name: token
+      in: query
+      required: true
+      schema:
+        type: string
+      description: APIアクセス用の有効なトークン
+    - name: email
+      in: query
+      required: true
+      schema:
+        type: string
+      description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 開始日一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              intakeDates:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    course_id:
+                      type: string
+                    month:
+                      type: number
+                    day:
+                      type: number
+                      nullable: true
+                    year:
+                      type: number
+                      nullable: true
+                    is_tentative:
+                      type: boolean
+                    notes:
+                      type: string
+                      nullable: true
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定されたコースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"
+post:
+  summary: 特定のコースに新しい開始日を登録
+  description: |
+    指定されたコースIDに新しい開始日情報を登録します。
+    アクセスには、有効期限内で未使用のアクセス**トークン**と**メールアドレス**が必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 開始日を登録するコースのID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - month
+            - token
+            - email
+          properties:
+            month:
+              type: number
+              description: 新しい開始日の月
+            day:
+              type: number
+              nullable: true
+              description: 新しい開始日の日
+            year:
+              type: number
+              nullable: true
+              description: 新しい開始日の年
+            is_tentative:
+              type: boolean
+              default: true
+              description: 暫定的な日付かどうか
+            notes:
+              type: string
+              nullable: true
+              description: 開始日に関するメモ
+            token:
+              type: string
+              description: APIアクセス用の有効なトークン
+            email:
+              type: string
+              format: email
+              description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 開始日が正常に登録された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              intakeDate:
+                type: object
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定されたコースが見つからない、または学校に属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"
+delete:
+  summary: 特定のコースから開始日を削除
+  description: |
+    指定された開始日ID (`intakeDateId`) に基づいて、コースの開始日を削除します。
+    アクセスには、有効期限内で未使用のアクセス**トークン**と**メールアドレス**が必要です。
+    トークンは使用後、履歴が更新されます。
+  tags:
+    - Schools
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 学校のID
+    - name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 開始日を削除するコースのID
+    - name: intakeDateId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 削除する開始日のID
+    - name: token
+      in: query
+      required: true
+      schema:
+        type: string
+      description: APIアクセス用の有効なトークン
+    - name: email
+      in: query
+      required: true
+      schema:
+        type: string
+      description: トークンに関連付けられたメールアドレス
+  responses:
+    "200":
+      description: 開始日が正常に削除された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+    "400":
+      description: 必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      description: 無効または期限切れのトークンの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 開始日が見つからない、またはコースに属していない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../../../../swagger.yaml#/components/responses/InternalServerError"
