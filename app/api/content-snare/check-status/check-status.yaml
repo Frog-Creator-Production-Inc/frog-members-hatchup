@@ -1,0 +1,79 @@
+post:
+  summary: Content Snareのサブミッションステータスを取得
+  description: |
+    指定された`submissionId`に基づいて、Content Snareのサブミッションの詳細情報を取得します。
+    このAPIは、複数の方法（環境変数、メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+  tags:
+    - Content-snare
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - submissionId
+          properties:
+            submissionId:
+              type: string
+              description: 取得するサブミッションのID
+  responses:
+    "200":
+      description: サブミッション情報が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Content Snare APIから返されるサブミッションオブジェクト
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              status:
+                type: string
+              completed_at:
+                type: string
+                format: date-time
+                nullable: true
+              client:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  full_name:
+                    type: string
+                  email:
+                    type: string
+    "400":
+      description: リクエストボディに `submissionId` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "submissionId が必要です"
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: Content Snareの認証情報がないか、トークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 存在しないサブミッションIDを指定した場合など、Content Snare APIからのエラー応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

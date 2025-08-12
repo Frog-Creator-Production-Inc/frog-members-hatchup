@@ -1,0 +1,75 @@
+post:
+  summary: Content Snareに新しいリクエストを作成
+  description: |
+    指定された`courseId`と`clientId`に基づいて、Content Snareに新しいリクエストを作成します。
+    リクエスト作成前に、認証済みユーザーのプロファイル情報でContent Snareのクライアント情報を更新し、コースに紐づくテンプレートIDを使用します。
+    このAPIは、複数の方法（メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+  tags:
+    - Content-snare
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - courseId
+            - clientId
+          properties:
+            courseId:
+              type: string
+              description: リクエストの元となるコースのID
+            clientId:
+              type: string
+              description: リクエストの宛先となるContent SnareクライアントのID
+  responses:
+    "200":
+      description: リクエストとコース申請が正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              request_id:
+                type: string
+                description: Content Snareで作成されたリクエストのID
+              share_link:
+                type: string
+                format: uri
+                description: リクエストへの共有リンク
+              application_id:
+                type: string
+                description: Supabaseで作成されたコース申請のID
+              success:
+                type: boolean
+    "400":
+      description: 必須パラメータの不足、またはコースにテンプレートが設定されていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: Content Snareの認証情報がないか、トークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定されたコースまたはユーザーが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

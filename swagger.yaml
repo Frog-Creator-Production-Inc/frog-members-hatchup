@@ -31,6 +31,32 @@ paths:
     $ref: "./app/api/content-snare/admin/get-templates/admin-get-templates.yaml"
   /api/content-snare/admin/list-requests:
     $ref: "./app/api/content-snare/admin/list-requests/admin-list-requests.yaml"
+  /api/content-snare/auth-code:
+    $ref: "./app/api/content-snare/auth-code/auth-code.yaml"
+  /api/content-snare/auth-status:
+    $ref: "./app/api/content-snare/auth-status/auth-status.yaml"
+  /api/content-snare/check-status:
+    $ref: "./app/api/content-snare/check-status/check-status.yaml"
+  /api/content-snare/client-search:
+    $ref: "./app/api/content-snare/client-search/client-search.yaml"
+  /api/content-snare/create-client:
+    $ref: "./app/api/content-snare/create-client/create-client.yaml"
+  /api/content-snare/create-request:
+    $ref: "./app/api/content-snare/create-request/create-request.yaml"
+  /api/content-snare/create-submission:
+    $ref: "./app/api/content-snare/create-submission/create-submission.yaml"
+  /api/content-snare/exchange-token:
+    $ref: "./app/api/content-snare/exchange-token/exchange-token.yaml"
+  /api/content-snare/get-applications:
+    $ref: "./app/api/content-snare/get-applications/get-applications.yaml"
+  /api/content-snare/get-request-status:
+    $ref: "./app/api/content-snare/get-request-status/get-request-status.yaml"
+  /api/content-snare/oauth-direct:
+    $ref: "./app/api/content-snare/oauth-direct/oauth-direct.yaml"
+  /api/content-snare/refresh-token:
+    $ref: "./app/api/content-snare/refresh-token/refresh-token.yaml"
+  /api/content-snare/webhook:
+    $ref: "./app/api/content-snare/webhook/webhook.yaml"
 
 components:
   responses:

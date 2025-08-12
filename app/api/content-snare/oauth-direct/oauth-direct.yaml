@@ -1,0 +1,24 @@
+get:
+  summary: Content SnareのOAuth認証URLを生成
+  description: |
+    Content Snareとの連携に必要なOAuth認証プロセスを開始するためのURLを生成します。
+    このURLは、指定された`client_id`、`redirect_uri`、および必要なスコープを含んでいます。
+    認証済みのユーザーのみが利用可能です。
+  tags:
+    - Content-snare
+  responses:
+    "200":
+      description: 認証URLが正常に生成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+                description: Content SnareのOAuth認証ページへの完全なURL
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

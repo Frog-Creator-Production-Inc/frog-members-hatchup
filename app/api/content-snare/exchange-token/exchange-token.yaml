@@ -1,0 +1,39 @@
+post:
+  summary: Content Snareのアクセストークンをリフレッシュ
+  description: |
+    Supabaseに保存されているリフレッシュトークンを使用して、Content Snareの新しいアクセストークンを取得します。
+    新しいリフレッシュトークンもデータベースに保存されます。
+    このAPIは、アクセストークンの有効期限が切れた際に呼び出されることを想定しています。
+  tags:
+    - Content-snare
+  responses:
+    "200":
+      description: トークンが正常にリフレッシュされた場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              access_token:
+                type: string
+                description: 新しく生成されたアクセストークン
+              token_type:
+                type: string
+                example: "Bearer"
+                description: トークンのタイプ
+              expires_in:
+                type: number
+                description: トークンの有効期限（秒単位）
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

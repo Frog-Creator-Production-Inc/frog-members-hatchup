@@ -1,0 +1,50 @@
+get:
+  summary: ユーザーのContent Snareアクセストークンをリフレッシュ
+  description: |
+    認証済みユーザーのContent Snareリフレッシュトークンを使用して、新しいアクセストークンを取得します。
+    新しいリフレッシュトークンはデータベースに更新され、アクセストークンはレスポンスとして返されます。
+    リフレッシュトークンが無効な場合は、データベースから削除し、再認証を促します。
+  tags:
+    - Content-snare
+  responses:
+    "200":
+      description: トークンが正常にリフレッシュされた場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              expiresAt:
+                type: string
+                format: date-time
+                description: 新しいアクセストークンの有効期限
+              access_token:
+                type: string
+                description: 新しく生成されたアクセストークン
+    "401":
+      description: 認証セッションがない、またはリフレッシュトークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "認証が必要です"
+              requireReauth:
+                type: boolean
+                description: リフレッシュトークンが無効で再認証が必要な場合に `true`
+    "404":
+      description: ユーザーのリフレッシュトークンが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "リフレッシュトークンが見つかりません"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

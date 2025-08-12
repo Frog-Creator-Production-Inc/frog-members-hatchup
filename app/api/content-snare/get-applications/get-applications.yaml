@@ -1,0 +1,67 @@
+get:
+  summary: 認証済みユーザーのコース申請一覧を取得
+  description: |
+    認証済みのユーザーが申請した全てのコース申請情報と、それに紐づくコースの詳細情報を取得します。
+    結果は申請が作成された新しい順にソートされます。
+  tags:
+    - Content-snare
+  responses:
+    "200":
+      description: コース申請一覧が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              applications:
+                type: array
+                description: ユーザーのコース申請情報のリスト
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    user_id:
+                      type: string
+                    course_id:
+                      type: string
+                    status:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                    request_url:
+                      type: string
+                      format: uri
+                      nullable: true
+                    content_snare_id:
+                      type: string
+                      nullable: true
+                    content_snare_request_id:
+                      type: string
+                      nullable: true
+                    course:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        school_id:
+                          type: string
+                        category:
+                          type: string
+                        description:
+                          type: string
+                        content_snare_template_id:
+                          type: string
+                          nullable: true
+              success:
+                type: boolean
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

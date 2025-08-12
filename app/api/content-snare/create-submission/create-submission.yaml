@@ -1,0 +1,68 @@
+post:
+  summary: Content Snareに新しいサブミッションを作成
+  description: |
+    指定されたクライアントIDとパッケージIDを使用して、Content Snareに新しいサブミッションを作成します。
+    このAPIは、複数の方法（環境変数、メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+    認証済みユーザーのみが利用可能です。
+  tags:
+    - Content-snare
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - clientId
+            - packageId
+          properties:
+            clientId:
+              type: string
+              description: サブミッションを割り当てるクライアントのID
+            packageId:
+              type: string
+              description: サブミッションの元となるパッケージのID
+  responses:
+    "200":
+      description: サブミッションが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Content Snare APIから返されるサブミッションオブジェクト
+            properties:
+              id:
+                type: string
+                description: 作成されたサブミッションのID
+              status:
+                type: string
+                description: サブミッションのステータス
+              package_id:
+                type: string
+                description: 使用されたパッケージのID
+              client_id:
+                type: string
+                description: 割り当てられたクライアントのID
+    "400":
+      description: リクエストボディに必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "clientId と packageId が必須です"
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

@@ -1,0 +1,32 @@
+get:
+  summary: Content Snareとの認証ステータスを確認
+  description: |
+    Supabaseの`refresh_tokens`テーブルからContent Snareの認証情報をチェックし、トークンの有効性を検証します。
+    リフレッシュトークンが有効であれば、新しいトークンに更新します。
+    このエンドポイントは、クライアント側で連携ステータスを表示するために使用されます。
+  tags:
+    - Content-snare
+  responses:
+    "200":
+      description: 認証ステータスの確認が正常に完了した場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              authenticated:
+                type: boolean
+                description: Content Snareとの連携が認証済みか
+              hasToken:
+                type: boolean
+                description: データベースにリフレッシュトークンが存在するか
+              tokenRefreshed:
+                type: boolean
+                description: リフレッシュトークンが正常に更新されたか
+              message:
+                type: string
+                description: ステータスに関する詳細メッセージ
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

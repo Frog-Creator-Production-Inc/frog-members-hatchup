@@ -1,0 +1,65 @@
+get:
+  summary: Content SnareのクライアントをEメールアドレスで検索
+  description: |
+    指定されたEメールアドレスに一致するContent Snareのクライアント情報を検索します。
+    このAPIは、複数の方法（環境変数、メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+    認証済みのユーザーのみが利用可能です。
+  tags:
+    - Content-snare
+  parameters:
+    - name: email
+      in: query
+      required: true
+      schema:
+        type: string
+        format: email
+      description: 検索するクライアントのEメールアドレス
+  responses:
+    "200":
+      description: 検索が正常に完了した場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              clients:
+                type: array
+                description: 検索結果として返されたクライアントのリスト
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    full_name:
+                      type: string
+                    email:
+                      type: string
+                    company:
+                      type: string
+                      nullable: true
+              success:
+                type: boolean
+                description: API呼び出しが成功したか
+    "400":
+      description: クエリパラメータ `email` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "emailクエリパラメータは必須です"
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: Content Snareの認証情報がないか、トークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

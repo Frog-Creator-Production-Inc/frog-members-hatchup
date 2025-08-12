@@ -1,0 +1,55 @@
+post:
+  summary: Content SnareからのWebhook通知を処理
+  description: |
+    Content Snareから送信されるWebhookイベント（例：リクエストの提出、承認、却下）を受信して処理します。
+    リクエストIDを基にSupabaseの`course_applications`テーブルを更新し、提出イベントの場合はSlackに通知を送信します。
+    このエンドポイントは認証を必要としません。
+  tags:
+    - Content-snare
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - event
+            - request_id
+          properties:
+            event:
+              type: string
+              description: 発生したイベントのタイプ（例：`request.submitted`）
+            request_id:
+              type: string
+              description: イベントに関連するContent SnareリクエストのID
+            # その他のペイロードデータはContent Snareの仕様に依存
+  responses:
+    "200":
+      description: Webhookイベントが正常に処理された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+    "400":
+      description: 無効なWebhookデータ（`event`または`request_id`が不足）の場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 関連するコース申請がデータベースに見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

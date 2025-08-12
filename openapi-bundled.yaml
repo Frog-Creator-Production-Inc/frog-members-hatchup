@@ -1009,6 +1009,846 @@ paths:
                     example: 管理者権限が必要です
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/auth-code:
+    get:
+      summary: Content SnareのOAuth認証URLを生成
+      description: |
+        OAuth 2.0の認可コードフローを開始するため、Content Snareの認証ページへのURLを生成します。
+        ランダムな`state`値を生成してSupabaseに保存し、CSRF攻撃を防ぎます。
+        このエンドポイントは認証済みユーザーのみが利用可能です。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: 認証URLが正常に生成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authUrl:
+                    type: string
+                    format: uri
+                    description: Content SnareのOAuth認証ページへの完全なURL
+                  state:
+                    type: string
+                    description: CSRF対策のために生成されたランダムな状態値
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/auth-status:
+    get:
+      summary: Content Snareとの認証ステータスを確認
+      description: |
+        Supabaseの`refresh_tokens`テーブルからContent Snareの認証情報をチェックし、トークンの有効性を検証します。
+        リフレッシュトークンが有効であれば、新しいトークンに更新します。
+        このエンドポイントは、クライアント側で連携ステータスを表示するために使用されます。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: 認証ステータスの確認が正常に完了した場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+                    description: Content Snareとの連携が認証済みか
+                  hasToken:
+                    type: boolean
+                    description: データベースにリフレッシュトークンが存在するか
+                  tokenRefreshed:
+                    type: boolean
+                    description: リフレッシュトークンが正常に更新されたか
+                  message:
+                    type: string
+                    description: ステータスに関する詳細メッセージ
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/check-status:
+    post:
+      summary: Content Snareのサブミッションステータスを取得
+      description: |
+        指定された`submissionId`に基づいて、Content Snareのサブミッションの詳細情報を取得します。
+        このAPIは、複数の方法（環境変数、メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+      tags:
+        - Content-snare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - submissionId
+              properties:
+                submissionId:
+                  type: string
+                  description: 取得するサブミッションのID
+      responses:
+        '200':
+          description: サブミッション情報が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Content Snare APIから返されるサブミッションオブジェクト
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  status:
+                    type: string
+                  completed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  client:
+                    type: object
+                    properties:
+                      id:
+                        type: number
+                      full_name:
+                        type: string
+                      email:
+                        type: string
+        '400':
+          description: リクエストボディに `submissionId` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: submissionId が必要です
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Content Snareの認証情報がないか、トークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 存在しないサブミッションIDを指定した場合など、Content Snare APIからのエラー応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/client-search:
+    get:
+      summary: Content SnareのクライアントをEメールアドレスで検索
+      description: |
+        指定されたEメールアドレスに一致するContent Snareのクライアント情報を検索します。
+        このAPIは、複数の方法（環境変数、メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+        認証済みのユーザーのみが利用可能です。
+      tags:
+        - Content-snare
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+          description: 検索するクライアントのEメールアドレス
+      responses:
+        '200':
+          description: 検索が正常に完了した場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clients:
+                    type: array
+                    description: 検索結果として返されたクライアントのリスト
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        full_name:
+                          type: string
+                        email:
+                          type: string
+                        company:
+                          type: string
+                          nullable: true
+                  success:
+                    type: boolean
+                    description: API呼び出しが成功したか
+        '400':
+          description: クエリパラメータ `email` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: emailクエリパラメータは必須です
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Content Snareの認証情報がないか、トークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/create-client:
+    post:
+      summary: Content Snareに新しいクライアントを作成
+      description: |
+        指定された名前とメールアドレスでContent Snareに新しいクライアントを作成します。
+        作成前に既存のクライアントを検索し、存在する場合は新規作成せずにその情報を返します。
+        このAPIは、複数の方法（メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+        認証済みのユーザーのみが利用可能です。
+      tags:
+        - Content-snare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstName
+                - lastName
+                - email
+              properties:
+                firstName:
+                  type: string
+                  description: クライアントの姓
+                lastName:
+                  type: string
+                  description: クライアントの名
+                email:
+                  type: string
+                  format: email
+                  description: クライアントのEメールアドレス
+      responses:
+        '200':
+          description: クライアントが正常に作成された、または既存のクライアント情報が返された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client_id:
+                    type: string
+                    description: Content Snareで作成された、または既存のクライアントのID
+                  success:
+                    type: boolean
+                    description: API呼び出しが成功したか
+                  already_exists:
+                    type: boolean
+                    description: クライアントが既に存在していた場合に `true`
+                  client_info:
+                    type: object
+                    description: 既存クライアントの詳細情報
+                    properties:
+                      id:
+                        type: string
+                      full_name:
+                        type: string
+                      email:
+                        type: string
+        '400':
+          description: リクエストボディに必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'firstName, lastName, emailは必須です'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '422':
+          description: クライアントは存在するが、詳細を取得できなかったなど、処理できないエンティティ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: クライアントは既に存在しますが、詳細を取得できませんでした。
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/create-request:
+    post:
+      summary: Content Snareに新しいリクエストを作成
+      description: |
+        指定された`courseId`と`clientId`に基づいて、Content Snareに新しいリクエストを作成します。
+        リクエスト作成前に、認証済みユーザーのプロファイル情報でContent Snareのクライアント情報を更新し、コースに紐づくテンプレートIDを使用します。
+        このAPIは、複数の方法（メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+      tags:
+        - Content-snare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - courseId
+                - clientId
+              properties:
+                courseId:
+                  type: string
+                  description: リクエストの元となるコースのID
+                clientId:
+                  type: string
+                  description: リクエストの宛先となるContent SnareクライアントのID
+      responses:
+        '200':
+          description: リクエストとコース申請が正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request_id:
+                    type: string
+                    description: Content Snareで作成されたリクエストのID
+                  share_link:
+                    type: string
+                    format: uri
+                    description: リクエストへの共有リンク
+                  application_id:
+                    type: string
+                    description: Supabaseで作成されたコース申請のID
+                  success:
+                    type: boolean
+        '400':
+          description: 必須パラメータの不足、またはコースにテンプレートが設定されていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Content Snareの認証情報がないか、トークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定されたコースまたはユーザーが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/create-submission:
+    post:
+      summary: Content Snareに新しいサブミッションを作成
+      description: |
+        指定されたクライアントIDとパッケージIDを使用して、Content Snareに新しいサブミッションを作成します。
+        このAPIは、複数の方法（環境変数、メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+        認証済みユーザーのみが利用可能です。
+      tags:
+        - Content-snare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clientId
+                - packageId
+              properties:
+                clientId:
+                  type: string
+                  description: サブミッションを割り当てるクライアントのID
+                packageId:
+                  type: string
+                  description: サブミッションの元となるパッケージのID
+      responses:
+        '200':
+          description: サブミッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Content Snare APIから返されるサブミッションオブジェクト
+                properties:
+                  id:
+                    type: string
+                    description: 作成されたサブミッションのID
+                  status:
+                    type: string
+                    description: サブミッションのステータス
+                  package_id:
+                    type: string
+                    description: 使用されたパッケージのID
+                  client_id:
+                    type: string
+                    description: 割り当てられたクライアントのID
+        '400':
+          description: リクエストボディに必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: clientId と packageId が必須です
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/exchange-token:
+    post:
+      summary: Content Snareのアクセストークンをリフレッシュ
+      description: |
+        Supabaseに保存されているリフレッシュトークンを使用して、Content Snareの新しいアクセストークンを取得します。
+        新しいリフレッシュトークンもデータベースに保存されます。
+        このAPIは、アクセストークンの有効期限が切れた際に呼び出されることを想定しています。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: トークンが正常にリフレッシュされた場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: 新しく生成されたアクセストークン
+                  token_type:
+                    type: string
+                    example: Bearer
+                    description: トークンのタイプ
+                  expires_in:
+                    type: number
+                    description: トークンの有効期限（秒単位）
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/get-applications:
+    get:
+      summary: 認証済みユーザーのコース申請一覧を取得
+      description: |
+        認証済みのユーザーが申請した全てのコース申請情報と、それに紐づくコースの詳細情報を取得します。
+        結果は申請が作成された新しい順にソートされます。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: コース申請一覧が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applications:
+                    type: array
+                    description: ユーザーのコース申請情報のリスト
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        user_id:
+                          type: string
+                        course_id:
+                          type: string
+                        status:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        request_url:
+                          type: string
+                          format: uri
+                          nullable: true
+                        content_snare_id:
+                          type: string
+                          nullable: true
+                        content_snare_request_id:
+                          type: string
+                          nullable: true
+                        course:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            school_id:
+                              type: string
+                            category:
+                              type: string
+                            description:
+                              type: string
+                            content_snare_template_id:
+                              type: string
+                              nullable: true
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/get-request-status:
+    get:
+      summary: Content Snareリクエストの詳細情報を取得
+      description: |
+        ユーザーが所有するContent Snareリクエストの詳細情報（進捗状況、ページ、セクションなど）を取得します。
+        リクエストIDは、アプリケーションIDまたはContent Snare自体のリクエストIDのいずれかで指定可能です。
+        このAPIは、トークンが期限切れの場合に自動的に再発行して再試行するロジックを含みます。
+      tags:
+        - Content-snare
+      parameters:
+        - name: request_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 取得するリクエストのID（コース申請IDまたはContent SnareリクエストID）
+        - name: verbose
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: |
+            `true`の場合、ページの詳細情報やレスポンスデータなど、より詳細な情報を含めて返します。
+            デフォルトは `false` です。
+      responses:
+        '200':
+          description: リクエストの詳細が正常に取得された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Content SnareリクエストのID
+                  name:
+                    type: string
+                    description: リクエスト名
+                  status:
+                    type: string
+                    description: リクエストのステータス
+                  url:
+                    type: string
+                    format: uri
+                    description: Content Snareプラットフォーム上のリクエストURL
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  progress:
+                    type: object
+                    description: リクエストの進捗状況
+                    properties:
+                      total_fields:
+                        type: number
+                        description: 全フィールド数
+                      done_fields:
+                        type: number
+                        description: 完了したフィールド数
+                      percent:
+                        type: number
+                        description: 進捗率（パーセンテージ）
+                      completed_sections:
+                        type: number
+                        description: 完了したセクション数
+                      total_sections:
+                        type: number
+                        description: 全セクション数
+                  sections:
+                    type: array
+                    description: リクエスト内のセクションリスト
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        status:
+                          type: string
+                  pages:
+                    type: array
+                    description: リクエスト内のページリスト（`verbose`が`false`の場合は簡略化）
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        status:
+                          type: string
+                  client:
+                    type: object
+                    description: 関連するクライアント情報
+                    properties:
+                      id:
+                        type: string
+                      full_name:
+                        type: string
+                      email:
+                        type: string
+                  has_unread_comments:
+                    type: boolean
+                  share_link:
+                    type: string
+                    format: uri
+                  due:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  folder_name:
+                    type: string
+                  last_activity_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  responses:
+                    type: array
+                    description: |
+                      `verbose=true`の場合にのみ含まれる、ユーザーの回答データ
+                    items:
+                      type: object
+                    nullable: true
+        '400':
+          description: クエリパラメータ `request_id` が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: ユーザーが指定されたリクエストへのアクセス権限を持っていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定されたIDに対応するContent Snareリクエストが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/oauth-direct:
+    get:
+      summary: Content SnareのOAuth認証URLを生成
+      description: |
+        Content Snareとの連携に必要なOAuth認証プロセスを開始するためのURLを生成します。
+        このURLは、指定された`client_id`、`redirect_uri`、および必要なスコープを含んでいます。
+        認証済みのユーザーのみが利用可能です。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: 認証URLが正常に生成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: Content SnareのOAuth認証ページへの完全なURL
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/refresh-token:
+    get:
+      summary: ユーザーのContent Snareアクセストークンをリフレッシュ
+      description: |
+        認証済みユーザーのContent Snareリフレッシュトークンを使用して、新しいアクセストークンを取得します。
+        新しいリフレッシュトークンはデータベースに更新され、アクセストークンはレスポンスとして返されます。
+        リフレッシュトークンが無効な場合は、データベースから削除し、再認証を促します。
+      tags:
+        - Content-snare
+      responses:
+        '200':
+          description: トークンが正常にリフレッシュされた場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    description: 新しいアクセストークンの有効期限
+                  access_token:
+                    type: string
+                    description: 新しく生成されたアクセストークン
+        '401':
+          description: 認証セッションがない、またはリフレッシュトークンが無効な場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 認証が必要です
+                  requireReauth:
+                    type: boolean
+                    description: リフレッシュトークンが無効で再認証が必要な場合に `true`
+        '404':
+          description: ユーザーのリフレッシュトークンが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: リフレッシュトークンが見つかりません
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/content-snare/webhook:
+    post:
+      summary: Content SnareからのWebhook通知を処理
+      description: |
+        Content Snareから送信されるWebhookイベント（例：リクエストの提出、承認、却下）を受信して処理します。
+        リクエストIDを基にSupabaseの`course_applications`テーブルを更新し、提出イベントの場合はSlackに通知を送信します。
+        このエンドポイントは認証を必要としません。
+      tags:
+        - Content-snare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - event
+                - request_id
+              properties:
+                event:
+                  type: string
+                  description: 発生したイベントのタイプ（例：`request.submitted`）
+                request_id:
+                  type: string
+                  description: イベントに関連するContent SnareリクエストのID
+      responses:
+        '200':
+          description: Webhookイベントが正常に処理された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: 無効なWebhookデータ（`event`または`request_id`が不足）の場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 関連するコース申請がデータベースに見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:

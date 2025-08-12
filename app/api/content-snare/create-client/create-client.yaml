@@ -1,0 +1,90 @@
+post:
+  summary: Content Snareに新しいクライアントを作成
+  description: |
+    指定された名前とメールアドレスでContent Snareに新しいクライアントを作成します。
+    作成前に既存のクライアントを検索し、存在する場合は新規作成せずにその情報を返します。
+    このAPIは、複数の方法（メモリ、Supabase）でアクセストークンを取得・更新し、Content SnareのAPIを呼び出します。
+    認証済みのユーザーのみが利用可能です。
+  tags:
+    - Content-snare
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - firstName
+            - lastName
+            - email
+          properties:
+            firstName:
+              type: string
+              description: クライアントの姓
+            lastName:
+              type: string
+              description: クライアントの名
+            email:
+              type: string
+              format: email
+              description: クライアントのEメールアドレス
+  responses:
+    "200":
+      description: クライアントが正常に作成された、または既存のクライアント情報が返された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                description: Content Snareで作成された、または既存のクライアントのID
+              success:
+                type: boolean
+                description: API呼び出しが成功したか
+              already_exists:
+                type: boolean
+                description: クライアントが既に存在していた場合に `true`
+              client_info:
+                type: object
+                description: 既存クライアントの詳細情報
+                properties:
+                  id:
+                    type: string
+                  full_name:
+                    type: string
+                  email:
+                    type: string
+    "400":
+      description: リクエストボディに必須パラメータが不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "firstName, lastName, emailは必須です"
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: Content Snareの認証情報がない、またはトークンが無効な場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "422":
+      description: クライアントは存在するが、詳細を取得できなかったなど、処理できないエンティティ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "クライアントは既に存在しますが、詳細を取得できませんでした。"
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

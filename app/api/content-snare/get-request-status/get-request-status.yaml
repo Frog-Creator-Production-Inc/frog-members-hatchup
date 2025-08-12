@@ -1,0 +1,157 @@
+get:
+  summary: Content Snareリクエストの詳細情報を取得
+  description: |
+    ユーザーが所有するContent Snareリクエストの詳細情報（進捗状況、ページ、セクションなど）を取得します。
+    リクエストIDは、アプリケーションIDまたはContent Snare自体のリクエストIDのいずれかで指定可能です。
+    このAPIは、トークンが期限切れの場合に自動的に再発行して再試行するロジックを含みます。
+  tags:
+    - Content-snare
+  parameters:
+    - name: request_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 取得するリクエストのID（コース申請IDまたはContent SnareリクエストID）
+    - name: verbose
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: |
+        `true`の場合、ページの詳細情報やレスポンスデータなど、より詳細な情報を含めて返します。
+        デフォルトは `false` です。
+  responses:
+    "200":
+      description: リクエストの詳細が正常に取得された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Content SnareリクエストのID
+              name:
+                type: string
+                description: リクエスト名
+              status:
+                type: string
+                description: リクエストのステータス
+              url:
+                type: string
+                format: uri
+                description: Content Snareプラットフォーム上のリクエストURL
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              progress:
+                type: object
+                description: リクエストの進捗状況
+                properties:
+                  total_fields:
+                    type: number
+                    description: 全フィールド数
+                  done_fields:
+                    type: number
+                    description: 完了したフィールド数
+                  percent:
+                    type: number
+                    description: 進捗率（パーセンテージ）
+                  completed_sections:
+                    type: number
+                    description: 完了したセクション数
+                  total_sections:
+                    type: number
+                    description: 全セクション数
+              sections:
+                type: array
+                description: リクエスト内のセクションリスト
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    status:
+                      type: string
+              pages:
+                type: array
+                description: リクエスト内のページリスト（`verbose`が`false`の場合は簡略化）
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    status:
+                      type: string
+              client:
+                type: object
+                description: 関連するクライアント情報
+                properties:
+                  id:
+                    type: string
+                  full_name:
+                    type: string
+                  email:
+                    type: string
+              has_unread_comments:
+                type: boolean
+              share_link:
+                type: string
+                format: uri
+              due:
+                type: string
+                format: date-time
+                nullable: true
+              folder_name:
+                type: string
+              last_activity_at:
+                type: string
+                format: date-time
+                nullable: true
+              responses:
+                type: array
+                description: |
+                  `verbose=true`の場合にのみ含まれる、ユーザーの回答データ
+                items:
+                  type: object
+                nullable: true
+    "400":
+      description: クエリパラメータ `request_id` が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "401":
+      $ref: "../../../../swagger.yaml#/components/responses/UnauthorizedError"
+    "403":
+      description: ユーザーが指定されたリクエストへのアクセス権限を持っていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定されたIDに対応するContent Snareリクエストが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
