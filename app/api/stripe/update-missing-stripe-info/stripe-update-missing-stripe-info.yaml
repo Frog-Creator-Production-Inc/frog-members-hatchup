@@ -1,0 +1,59 @@
+post:
+  summary: メンバーシップに紐づくStripe顧客・サブスクリプション情報を更新
+  description: |
+    このエンドポイントは、ユーザーのメンバーシップ情報に基づいて、関連するStripeの顧客IDとサブスクリプションIDをデータベースに同期・更新します。
+    ユーザーが既にメンバーであり、Stripe情報がプロファイルに未登録の場合にこの処理を実行します。
+    具体的には、ユーザーのメールアドレスを使ってStripeから顧客情報を検索し、アクティブなサブスクリプションIDを取得して、データベースのユーザープロファイルを更新します。
+    このAPIは、何らかの理由でStripe情報がデータベースと同期されていない場合に、手動で同期を行うために使用できます。
+  tags:
+    - Stripe
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: Stripe情報を更新するユーザーのID
+              example: "abcde12345-fghij67890"
+  responses:
+    "200":
+      description: |
+        Stripe情報が正常に更新された、または更新の必要がなかった場合の応答。
+        ユーザーが既にメンバーでない場合、またはStripe情報が既に存在する場合は、このステータスコードが返されます。
+      content:
+        application/json:
+          schema:
+            type: object
+            oneOf:
+              - properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      customerId:
+                        type: string
+                      subscriptionId:
+                        type: string
+              - properties:
+                  message:
+                    type: string
+    "404":
+      description: |
+        指定された`userId`のユーザープロファイルが見つからない場合、またはStripeにメールアドレス/アクティブなサブスクリプションが見つからない場合の応答。
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

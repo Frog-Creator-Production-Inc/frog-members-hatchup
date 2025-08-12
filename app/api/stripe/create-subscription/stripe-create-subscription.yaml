@@ -1,0 +1,48 @@
+post:
+  summary: メンバーシップサブスクリプションのためのStripeチェックアウトセッションを作成
+  description: |
+    このエンドポイントは、新しいメンバーシップサブスクリプションの支払いのために、Stripeのチェックアウトセッションを作成します。
+    リクエストボディで`userId`を受け取り、ユーザーのメールアドレスがすでにメンバーでないことを確認します。
+    確認後、Stripe APIを介して決済セッションを生成し、成功時とキャンセル時のリダイレクトURLを設定します。
+    セッションには、ユーザーIDなどのメタデータが含まれており、Webhookで後続処理を可能にします。
+    生成されたセッションIDとURLがフロントエンドに返されます。
+  tags:
+    - Stripe
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: サブスクリプションを購入するユーザーのID
+  responses:
+    "200":
+      description: チェックアウトセッションが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              sessionId:
+                type: string
+                description: 生成されたStripeチェックアウトセッションのID
+              url:
+                type: string
+                format: uri
+                description: チェックアウトページへのリダイレクトURL
+    "400":
+      description: ユーザーがすでにメンバーである場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

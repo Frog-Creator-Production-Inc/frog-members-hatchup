@@ -1,0 +1,64 @@
+post:
+  summary: ユーザーのStripeサブスクリプションをキャンセル
+  description: |
+    このエンドポイントは、指定された`userId`に紐づくStripeのサブスクリプションをキャンセルします。
+    ユーザーのプロファイルからサブスクリプションIDを取得し、Stripe APIを介してキャンセル処理を実行します。
+    キャンセル後、データベースのユーザープロファイル情報を更新して、メンバーシップステータスを非アクティブにします。
+    すでにキャンセル済みの場合やStripe側でサブスクリプションが見つからない場合でも、データベースの整合性を保つようになっています。
+  tags:
+    - Stripe
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: サブスクリプションをキャンセルするユーザーのID
+              example: "abcde12345-fghij67890"
+  responses:
+    "200":
+      description: サブスクリプションが正常にキャンセルされた場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+    "400":
+      description: 必須パラメータが不足している、またはアクティブなサブスクリプションが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: 指定された`userId`のユーザープロファイルが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      description: サーバーエラー、Stripe APIの呼び出し失敗、またはデータベースの更新失敗の場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: string
+                nullable: true

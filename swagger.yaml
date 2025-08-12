@@ -105,6 +105,18 @@ paths:
     $ref: "./app/api/slack/notify-visa-message/slack-notify-visa-message.yaml"
   /api/slack:
     $ref: "./app/api/slack/slack.yaml"
+  /api/stripe/cancel-subscription:
+    $ref: "./app/api/stripe/cancel-subscription/stripe-cancel-subscription.yaml"
+  /api/stripe/create-customer-portal-session:
+    $ref: "./app/api/stripe/create-customer-portal-session/stripe-create-customer-portal-session.yaml"
+  /api/stripe/create-portal-session:
+    $ref: "./app/api/stripe/create-portal-session/stripe-create-portal-session.yaml"
+  /api/stripe/create-subscription:
+    $ref: "./app/api/stripe/create-subscription/stripe-create-subscription.yaml"
+  /api/stripe/update-missing-stripe-info:
+    $ref: "./app/api/stripe/update-missing-stripe-info/stripe-update-missing-stripe-info.yaml"
+  /api/stripe/webhook:
+    $ref: "./app/api/stripe/webhook/stripe-webhook.yaml"
 
 components:
   responses:

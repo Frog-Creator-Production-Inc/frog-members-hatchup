@@ -1,0 +1,53 @@
+post:
+  summary: Stripeウェブフックイベントを処理
+  description: |
+    このエンドポイントはStripeからのウェブフックイベントを受信し、処理します。
+    リクエストはStripeのシグネチャで検証され、認証後、イベントのタイプに応じて以下の処理を実行します。
+    - `checkout.session.completed`: 決済セッションが完了した際に、`userId`を含むメタデータからユーザーを特定し、Supabaseの`profiles`テーブルを更新してメンバーシップを有効にします。
+    - `customer.subscription.deleted`: サブスクリプションがキャンセルされた際に、関連するユーザーを特定し、`is_member`フラグを`false`に設定してメンバーシップを無効化します。
+    - `customer.subscription.updated`: サブスクリプションが更新された際に、キャンセル予定の状態や、期間終了日の変更などを`profiles`テーブルに反映します。
+    Supabaseへのアクセスにはサービスロールキーを使用し、サーバーサイドから安全にデータベースを操作します。
+  tags:
+    - Stripe
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          description: Stripeウェブフックイベントのペイロード
+  responses:
+    "200":
+      description: イベントが正常に処理された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+    "400":
+      description: 不正なシグネチャ、または必要な情報（`userId`、`subscriptionId`、`customerId`など）が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: string
+                nullable: true
+    "404":
+      description: サブスクリプションIDまたは顧客IDからユーザーが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

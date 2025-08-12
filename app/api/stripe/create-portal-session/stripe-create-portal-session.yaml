@@ -1,0 +1,56 @@
+post:
+  summary: 認証されたユーザーのStripeカスタマーポータルセッションを作成
+  description: |
+    このエンドポイントは、現在認証されているユーザーのStripeカスタマーポータルへのリダイレクトURLを生成します。
+    ユーザーのセッションとプロフィールからStripe顧客IDを取得し、Stripe APIを介してセッションを作成します。
+    ユーザーは、このURLを使用して、請求情報やサブスクリプションを管理できます。
+    Stripeの顧客ポータルが正しく設定されていない場合は、詳細なエラーメッセージを返します。
+  tags:
+    - Stripe
+  security:
+    - cookieAuth: []
+  responses:
+    "200":
+      description: セッションが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+                description: StripeカスタマーポータルへのリダイレクトURL
+    "400":
+      description: Stripe顧客ポータルが設定されていない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+              details:
+                type: string
+    "401":
+      description: 認証されていないユーザーからのリクエストの場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "404":
+      description: ユーザーにStripe顧客IDが見つからない場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"

@@ -4580,6 +4580,328 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/stripe/cancel-subscription:
+    post:
+      summary: ユーザーのStripeサブスクリプションをキャンセル
+      description: |
+        このエンドポイントは、指定された`userId`に紐づくStripeのサブスクリプションをキャンセルします。
+        ユーザーのプロファイルからサブスクリプションIDを取得し、Stripe APIを介してキャンセル処理を実行します。
+        キャンセル後、データベースのユーザープロファイル情報を更新して、メンバーシップステータスを非アクティブにします。
+        すでにキャンセル済みの場合やStripe側でサブスクリプションが見つからない場合でも、データベースの整合性を保つようになっています。
+      tags:
+        - Stripe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: サブスクリプションをキャンセルするユーザーのID
+                  example: abcde12345-fghij67890
+      responses:
+        '200':
+          description: サブスクリプションが正常にキャンセルされた場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: 必須パラメータが不足している、またはアクティブなサブスクリプションが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: 指定された`userId`のユーザープロファイルが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: サーバーエラー、Stripe APIの呼び出し失敗、またはデータベースの更新失敗の場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+  /api/stripe/create-customer-portal-session:
+    post:
+      summary: Stripeカスタマーポータルセッションを作成
+      description: |
+        このエンドポイントは、Stripeの顧客ポータルへのリダイレクトURLを生成します。
+        リクエストボディで`customerId`を受け取り、Stripe APIを使用して新しいセッションを作成します。
+        生成されたURLは、顧客が請求情報、サブスクリプション、支払い履歴などを管理するためのポータルにアクセスするために使用されます。
+        ユーザーは、このURLにリダイレクトされることで、Stripeで直接アカウントを管理できます。
+      tags:
+        - Stripe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+              properties:
+                customerId:
+                  type: string
+                  description: Stripeの顧客ID
+                  example: cus_L3tW9z4m2Jp7z5
+      responses:
+        '200':
+          description: セッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: StripeカスタマーポータルへのリダイレクトURL
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/stripe/create-portal-session:
+    post:
+      summary: 認証されたユーザーのStripeカスタマーポータルセッションを作成
+      description: |
+        このエンドポイントは、現在認証されているユーザーのStripeカスタマーポータルへのリダイレクトURLを生成します。
+        ユーザーのセッションとプロフィールからStripe顧客IDを取得し、Stripe APIを介してセッションを作成します。
+        ユーザーは、このURLを使用して、請求情報やサブスクリプションを管理できます。
+        Stripeの顧客ポータルが正しく設定されていない場合は、詳細なエラーメッセージを返します。
+      tags:
+        - Stripe
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: セッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: StripeカスタマーポータルへのリダイレクトURL
+        '400':
+          description: Stripe顧客ポータルが設定されていない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  details:
+                    type: string
+        '401':
+          description: 認証されていないユーザーからのリクエストの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: ユーザーにStripe顧客IDが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/stripe/create-subscription:
+    post:
+      summary: メンバーシップサブスクリプションのためのStripeチェックアウトセッションを作成
+      description: |
+        このエンドポイントは、新しいメンバーシップサブスクリプションの支払いのために、Stripeのチェックアウトセッションを作成します。
+        リクエストボディで`userId`を受け取り、ユーザーのメールアドレスがすでにメンバーでないことを確認します。
+        確認後、Stripe APIを介して決済セッションを生成し、成功時とキャンセル時のリダイレクトURLを設定します。
+        セッションには、ユーザーIDなどのメタデータが含まれており、Webhookで後続処理を可能にします。
+        生成されたセッションIDとURLがフロントエンドに返されます。
+      tags:
+        - Stripe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: サブスクリプションを購入するユーザーのID
+      responses:
+        '200':
+          description: チェックアウトセッションが正常に作成された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    description: 生成されたStripeチェックアウトセッションのID
+                  url:
+                    type: string
+                    format: uri
+                    description: チェックアウトページへのリダイレクトURL
+        '400':
+          description: ユーザーがすでにメンバーである場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/stripe/update-missing-stripe-info:
+    post:
+      summary: メンバーシップに紐づくStripe顧客・サブスクリプション情報を更新
+      description: |
+        このエンドポイントは、ユーザーのメンバーシップ情報に基づいて、関連するStripeの顧客IDとサブスクリプションIDをデータベースに同期・更新します。
+        ユーザーが既にメンバーであり、Stripe情報がプロファイルに未登録の場合にこの処理を実行します。
+        具体的には、ユーザーのメールアドレスを使ってStripeから顧客情報を検索し、アクティブなサブスクリプションIDを取得して、データベースのユーザープロファイルを更新します。
+        このAPIは、何らかの理由でStripe情報がデータベースと同期されていない場合に、手動で同期を行うために使用できます。
+      tags:
+        - Stripe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: Stripe情報を更新するユーザーのID
+                  example: abcde12345-fghij67890
+      responses:
+        '200':
+          description: |
+            Stripe情報が正常に更新された、または更新の必要がなかった場合の応答。
+            ユーザーが既にメンバーでない場合、またはStripe情報が既に存在する場合は、このステータスコードが返されます。
+          content:
+            application/json:
+              schema:
+                type: object
+                oneOf:
+                  - properties:
+                      success:
+                        type: boolean
+                      message:
+                        type: string
+                      data:
+                        type: object
+                        properties:
+                          customerId:
+                            type: string
+                          subscriptionId:
+                            type: string
+                  - properties:
+                      message:
+                        type: string
+        '404':
+          description: |
+            指定された`userId`のユーザープロファイルが見つからない場合、またはStripeにメールアドレス/アクティブなサブスクリプションが見つからない場合の応答。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/stripe/webhook:
+    post:
+      summary: Stripeウェブフックイベントを処理
+      description: |
+        このエンドポイントはStripeからのウェブフックイベントを受信し、処理します。
+        リクエストはStripeのシグネチャで検証され、認証後、イベントのタイプに応じて以下の処理を実行します。
+        - `checkout.session.completed`: 決済セッションが完了した際に、`userId`を含むメタデータからユーザーを特定し、Supabaseの`profiles`テーブルを更新してメンバーシップを有効にします。
+        - `customer.subscription.deleted`: サブスクリプションがキャンセルされた際に、関連するユーザーを特定し、`is_member`フラグを`false`に設定してメンバーシップを無効化します。
+        - `customer.subscription.updated`: サブスクリプションが更新された際に、キャンセル予定の状態や、期間終了日の変更などを`profiles`テーブルに反映します。
+        Supabaseへのアクセスにはサービスロールキーを使用し、サーバーサイドから安全にデータベースを操作します。
+      tags:
+        - Stripe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripeウェブフックイベントのペイロード
+      responses:
+        '200':
+          description: イベントが正常に処理された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: 不正なシグネチャ、または必要な情報（`userId`、`subscriptionId`、`customerId`など）が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+        '404':
+          description: サブスクリプションIDまたは顧客IDからユーザーが見つからない場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:

@@ -1,0 +1,36 @@
+post:
+  summary: Stripeカスタマーポータルセッションを作成
+  description: |
+    このエンドポイントは、Stripeの顧客ポータルへのリダイレクトURLを生成します。
+    リクエストボディで`customerId`を受け取り、Stripe APIを使用して新しいセッションを作成します。
+    生成されたURLは、顧客が請求情報、サブスクリプション、支払い履歴などを管理するためのポータルにアクセスするために使用されます。
+    ユーザーは、このURLにリダイレクトされることで、Stripeで直接アカウントを管理できます。
+  tags:
+    - Stripe
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - customerId
+          properties:
+            customerId:
+              type: string
+              description: Stripeの顧客ID
+              example: "cus_L3tW9z4m2Jp7z5"
+  responses:
+    "200":
+      description: セッションが正常に作成された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+                description: StripeカスタマーポータルへのリダイレクトURL
+    "500":
+      $ref: "../../../../swagger.yaml#/components/responses/InternalServerError"
