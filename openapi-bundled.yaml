@@ -4902,6 +4902,132 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/visa-plan-reviews/update:
+    post:
+      summary: ビザプランレビューの更新
+      description: |
+        このエンドポイントは、管理者によるビザプランのレビューを更新するために使用されます。
+        認証された管理者のみがこのAPIにアクセスできます。
+        リクエストボディで提供されたレビューID、管理者ID、コメント、ステータスなどの情報を使用して、`visa_plan_reviews`テーブルの該当レコードを更新します。
+        ステータスが「completed」に更新された場合、関連する`visa_plans`テーブルのステータスも「reviewed」に更新されます。
+      tags:
+        - Visa Plan Review
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - review_id
+                - admin_id_input
+                - admin_comment_input
+                - status_input
+              properties:
+                review_id:
+                  type: string
+                  description: 更新するビザプランレビューのID
+                admin_id_input:
+                  type: string
+                  description: レビューを更新する管理者のID
+                admin_comment_input:
+                  type: string
+                  description: 管理者によるレビューコメント
+                status_input:
+                  type: string
+                  enum:
+                    - pending
+                    - completed
+                  description: 更新後のレビューのステータス
+                completed_at_input:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: レビューが完了した日時（`status_input`が`completed`の場合に設定）
+      responses:
+        '200':
+          description: ビザプランレビューが正常に更新された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: 必須パラメータが不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: 認証されていないユーザーからのリクエストの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '403':
+          description: 管理者権限がないユーザーからのリクエストの場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/webhook:
+    post:
+      summary: Stripeウェブフックイベントを処理
+      description: |
+        このエンドポイントはStripeからのウェブフックイベントを受信し、データベースのユーザー情報を更新します。リクエストはStripeのシグネチャで検証され、認証後、イベントのタイプに応じてSupabaseの`profiles`テーブルを更新します。
+        - `checkout.session.completed`: 決済セッションが完了した際に、ユーザーを特定し、`is_member`フラグを`true`に設定し、Stripeの顧客IDとサブスクリプションIDを保存します。
+        - `customer.subscription.deleted`: サブスクリプションがキャンセルされた際に、関連するユーザーを特定し、`is_member`フラグを`false`に設定します。
+        - `customer.subscription.updated`: サブスクリプションが再開された場合、メンバーシップを再度有効化します。キャンセル予定の更新はここでは特に処理しません。
+      tags:
+        - Webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripeウェブフックイベントのペイロード
+      responses:
+        '200':
+          description: イベントが正常に処理された場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: 不正なシグネチャ、または必要な情報（`userId`、`subscriptionId`など）が不足している場合の応答
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:

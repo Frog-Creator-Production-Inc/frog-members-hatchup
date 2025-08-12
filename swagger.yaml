@@ -117,6 +117,10 @@ paths:
     $ref: "./app/api/stripe/update-missing-stripe-info/stripe-update-missing-stripe-info.yaml"
   /api/stripe/webhook:
     $ref: "./app/api/stripe/webhook/stripe-webhook.yaml"
+  /api/visa-plan-reviews/update:
+    $ref: "./app/api/visa-plan-reviews/update/visa-plan-reviews-update.yaml"
+  /api/webhook:
+    $ref: "./app/api/webhook/webhook.yaml"
 
 components:
   responses:

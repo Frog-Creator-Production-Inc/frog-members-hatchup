@@ -1,0 +1,40 @@
+post:
+  summary: Stripeウェブフックイベントを処理
+  description: |
+    このエンドポイントはStripeからのウェブフックイベントを受信し、データベースのユーザー情報を更新します。リクエストはStripeのシグネチャで検証され、認証後、イベントのタイプに応じてSupabaseの`profiles`テーブルを更新します。
+    - `checkout.session.completed`: 決済セッションが完了した際に、ユーザーを特定し、`is_member`フラグを`true`に設定し、Stripeの顧客IDとサブスクリプションIDを保存します。
+    - `customer.subscription.deleted`: サブスクリプションがキャンセルされた際に、関連するユーザーを特定し、`is_member`フラグを`false`に設定します。
+    - `customer.subscription.updated`: サブスクリプションが再開された場合、メンバーシップを再度有効化します。キャンセル予定の更新はここでは特に処理しません。
+  tags:
+    - Webhook
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          description: Stripeウェブフックイベントのペイロード
+  responses:
+    "200":
+      description: イベントが正常に処理された場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    "400":
+      description: 不正なシグネチャ、または必要な情報（`userId`、`subscriptionId`など）が不足している場合の応答
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: string
+                nullable: true
+    "500":
+      $ref: "../../../swagger.yaml#/components/responses/InternalServerError"
