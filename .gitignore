@@ -43,3 +43,7 @@ repomix-output.xml
 .flaskenv*
 !.env.project
 .env.vault
+
+# Claude
+CLAUDE.md
+
