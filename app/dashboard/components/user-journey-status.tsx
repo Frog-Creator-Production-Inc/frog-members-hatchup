@@ -162,57 +162,59 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
 
       {/* 渡航ステップ - ステップ全体をボタン化 */}
       <div>
-        <h3 className="text-lg font-bold mb-10 flex items-center">
+        <h3 className="text-lg font-bold mb-4 flex items-center">
           <CheckCircle className="h-5 w-5 mr-2 text-primary" />
           渡航までの4ステップ
         </h3>
         
         {/* デスクトップ表示 - 横並び */}
-        <div className="hidden md:grid grid-cols-4 gap-4">
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {migrationSteps.map((step, index) => (
             <Link 
               key={step.id} 
               href={step.link}
               className="group relative flex flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <div className={`relative mx-4 -mt-6 h-40 overflow-hidden rounded-xl text-white shadow-lg`}>
-                {index === 0 && (
-                  <Image
-                    src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/cb241a2106af443f822864f2b1761f38/image_cardpic_1.jpg"
-                    alt="情報収集"
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                )}
-                {index === 1 && (
-                  <Image
-                    src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/754bd84c3fba4623a12634a73e21df34/image_cardpic_2.jpg"
-                    alt="学校選び"
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                )}
-                {index === 2 && (
-                  <Image
-                    src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/1a20d7df9fbb438cba89990f6317c790/image_cardpic_3.jpg"
-                    alt="ビザプランニング"
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                )}
-                {index === 3 && (
-                  <Image
-                    src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/597d3554a877490c8c9c0bb8a636b1e6/image_cardpic_4.jpg"
-                    alt="準備と学習"
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                )}
-                <div className={`absolute inset-0 bg-gradient-to-r ${step.color} opacity-60 group-hover:opacity-0 transition-opacity duration-300`}></div>
+              <div className="relative mx-4 mt-5 aspect-[16/9] overflow-hidden rounded-xl text-white shadow-lg group">
+                <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-110">
+                  {index === 0 && (
+                    <Image
+                      src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/cb241a2106af443f822864f2b1761f38/image_cardpic_1.jpg"
+                      alt="情報収集"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  )}
+                  {index === 1 && (
+                    <Image
+                      src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/754bd84c3fba4623a12634a73e21df34/image_cardpic_2.jpg"
+                      alt="学校選び"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  )}
+                  {index === 2 && (
+                    <Image
+                      src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/1a20d7df9fbb438cba89990f6317c790/image_cardpic_3.jpg"
+                      alt="ビザプランニング"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  )}
+                  {index === 3 && (
+                    <Image
+                      src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/597d3554a877490c8c9c0bb8a636b1e6/image_cardpic_4.jpg"
+                      alt="準備と学習"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+                <div className={`absolute inset-0 bg-gradient-to-r ${step.color} opacity-0 group-hover:opacity-60 transition-opacity duration-300`}></div>
                 <div className="absolute bottom-3 right-3">
                   <div className="rounded-full p-2 bg-white/20 backdrop-blur-sm">
                     <step.icon className="h-5 w-5" />
@@ -220,24 +222,25 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
                 </div>
               </div>
               
-              <div className="p-5">
+              <div className="px-3 py-5">
+                <span className="inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 mb-2 text-xs font-medium">
+                  ステップ {index + 1}
+                </span>
+
                 <div className="flex items-center mb-2">
-                  <h5 className="block font-sans text-lg font-semibold leading-snug tracking-normal text-gray-900 antialiased">
+                  <h5 className="block font-sans text-sm xl:text-lg font-semibold leading-snug tracking-normal text-gray-900 antialiased">
                     {step.title}
                   </h5>
-                  <span className="ml-2 inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 text-xs font-medium">
-                    ステップ {index + 1}
-                  </span>
                 </div>
                 <p className="block font-sans text-sm font-light leading-relaxed text-gray-600 antialiased">
                   {step.description}
                 </p>
               </div>
               
-              <div className="p-5 pt-0 mt-auto">
-                <div className={`select-none rounded-lg py-2.5 px-4 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md transition-all hover:shadow-lg focus:opacity-[0.85] focus:shadow-none bg-gradient-to-r ${step.color} group-hover:opacity-90`}>
+              <div className="px-3 py-5 pt-0 mt-auto">
+                <div className={`select-none rounded-lg py-2.5 px-4 text-center align-middle font-sans text-xs xl:text-sm font-bold uppercase text-white shadow-md transition-all hover:shadow-lg focus:opacity-[0.85] focus:shadow-none bg-gradient-to-r ${step.color} group-hover:opacity-90`}>
                   ステップを見る
-                  <ArrowRight className="h-3.5 w-3.5 ml-1.5 inline-block" />
+                  {/* <ArrowRight className="h-3.5 w-3.5 ml-1.5 inline-block" /> */}
                 </div>
               </div>
             </Link>
@@ -252,7 +255,7 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
               href={step.link}
               className="group relative flex flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <div className={`relative mx-4 -mt-4 h-28 overflow-hidden rounded-xl text-white shadow-lg`}>
+              <div className={`relative mx-4 mt-5 h-28 overflow-hidden rounded-xl text-white shadow-lg`}>
                 {index === 0 && (
                   <Image
                     src="https://images.microcms-assets.io/assets/85587b49d72b496e934cea1ec7411c0d/cb241a2106af443f822864f2b1761f38/image_cardpic_1.jpg"
@@ -289,7 +292,7 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
                     className="object-cover"
                   />
                 )}
-                <div className={`absolute inset-0 bg-gradient-to-r ${step.color} opacity-60 group-hover:opacity-0 transition-opacity duration-300`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-r ${step.color} opacity-0 group-hover:opacity-60 transition-opacity duration-300`}></div>
                 <div className="absolute bottom-2 right-2">
                   <div className="rounded-full p-1.5 bg-white/20 backdrop-blur-sm">
                     <step.icon className="h-4 w-4" />
@@ -298,13 +301,14 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
               </div>
               
               <div className="p-4">
+                <span className="inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 mb-2 text-xs font-medium">
+                  ステップ {index + 1}
+                </span>
+
                 <div className="flex items-center mb-1">
                   <h5 className="block font-sans text-base font-semibold leading-snug tracking-normal text-gray-900 antialiased">
                     {step.title}
                   </h5>
-                  <span className="ml-2 inline-block bg-gray-100 text-gray-700 rounded-full px-2 py-0.5 text-xs font-medium">
-                    ステップ {index + 1}
-                  </span>
                 </div>
                 <p className="block font-sans text-sm font-light leading-relaxed text-gray-600 antialiased">
                   {step.description}
@@ -314,7 +318,7 @@ export default function UserJourneyStatus({ profile }: UserJourneyStatusProps) {
               <div className="p-4 pt-0 mt-auto">
                 <div className={`select-none rounded-lg py-2 px-4 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md transition-all hover:shadow-lg focus:opacity-[0.85] focus:shadow-none bg-gradient-to-r ${step.color} group-hover:opacity-90`}>
                   ステップを見る
-                  <ArrowRight className="h-3.5 w-3.5 ml-1.5 inline-block" />
+                  {/* <ArrowRight className="h-3.5 w-3.5 ml-1.5 inline-block" /> */}
                 </div>
               </div>
             </Link>

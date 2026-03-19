@@ -593,7 +593,7 @@ export default function EnhancedCourseSearch({
                   </div>
                   <div className="flex justify-between mt-2 text-xs text-gray-500">
                     <span>最低: CA$0</span>
-                    <span>最高: CA$30,000</span>
+                    <span>最高: CA$70,000</span>
                   </div>
                 </div>
               </div>

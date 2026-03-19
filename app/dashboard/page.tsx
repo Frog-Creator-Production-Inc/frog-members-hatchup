@@ -381,7 +381,7 @@ export default async function DashboardPage() {
           {/* 重要な渡航情報の指標 - 常に最上部に固定表示 */}
           <div className="bg-background pt-2">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Card className="bg-white border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+              <Card className="bg-white border-l-4 border-l-blue-500 shadow-sm transition-shadow">
                 <CardContent className="p-3">
                   <div className="flex flex-col">
                     <p className="text-xs text-muted-foreground mb-1">渡航目的</p>
@@ -405,7 +405,7 @@ export default async function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow">
+              <Card className="bg-white border-l-4 border-l-green-500 shadow-sm transition-shadow">
                 <CardContent className="p-3">
                   <div className="flex flex-col">
                     <p className="text-xs text-muted-foreground mb-1">渡航時期</p>
@@ -429,7 +429,7 @@ export default async function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-l-4 border-l-amber-500 shadow-sm hover:shadow-md transition-shadow">
+              <Card className="bg-white border-l-4 border-l-amber-500 shadow-sm transition-shadow">
                 <CardContent className="p-3">
                   <div className="flex flex-col">
                     <p className="text-xs text-muted-foreground mb-1">目的の場所</p>
@@ -445,7 +445,7 @@ export default async function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow">
+              <Card className="bg-white border-l-4 border-l-purple-500 shadow-sm transition-shadow">
                 <CardContent className="p-3">
                   <div className="flex flex-col">
                     <p className="text-xs text-muted-foreground mb-1">将来希望する職業</p>
