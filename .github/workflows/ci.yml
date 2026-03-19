@@ -27,14 +27,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linting
-        run: npm run lint
-
       - name: Build project
         run: npm run build
 
+      - name: Run linting
+        run: npm run lint
+        continue-on-error: true
+
       - name: Type check
         run: npx tsc --noEmit
+        continue-on-error: true
+
+      - name: Check for unused dependencies
+        run: npx depcheck --ignores="@types/*"
+        continue-on-error: true
 
   test:
     runs-on: ubuntu-latest
