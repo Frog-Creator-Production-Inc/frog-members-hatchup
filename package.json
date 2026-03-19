@@ -98,6 +98,7 @@
     "@vitest/coverage-v8": "^2.1.9",
     "eslint": "8.57.1",
     "eslint-config-next": "15.3.5",
+    "jsdom": "^27.0.1",
     "typescript": "^5",
     "vitest": "^2.1.9"
   }

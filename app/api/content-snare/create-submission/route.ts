@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     if (!accessToken) {
       
       return NextResponse.json(
-        { error: "Content Snareのアクセストトークンが見つかりません、Eenv.localファイルまたは環境変数にCONTENT_SNARE_ACCESS_TOKENを設定してください" }, 
+        { error: "Content Snareのアクセストークンが見つかりません、.env.localファイルまたは環境変数にCONTENT_SNARE_ACCESS_TOKENを設定してください" },
         { status: 403 }
       );
     }
