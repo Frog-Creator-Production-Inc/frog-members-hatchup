@@ -86,8 +86,6 @@ jobs:
         with:
           json-summary-path: coverage/coverage-summary.json
           json-final-path: coverage/coverage-final.json
-          lcov-path: coverage/lcov.info
-          annotations: none
         continue-on-error: true
 
   security:
