@@ -55,7 +55,7 @@ export function MobileNav() {
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72">
+      <SheetContent side="left" className="w-72 bg-white">
         <div className="flex flex-col h-full">
           <div className="flex-1 py-6">
             <nav className="grid items-start gap-2">
@@ -65,8 +65,8 @@ export function MobileNav() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                    pathname === item.href ? "bg-accent" : "transparent"
+                    "group flex items-center rounded-md px-3 py-2 text-sm font-medium active:bg-green-100 active:shadow-inner transition-all ease-linear",
+                    pathname === item.href ? "bg-gradient-to-r from-green-400 to-green-600 text-white" : "bg-transparent text-gray-700"
                   )}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
